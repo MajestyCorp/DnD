@@ -1615,6 +1615,7 @@ GameObject:
   - component: {fileID: 58848819}
   - component: {fileID: 58848818}
   - component: {fileID: 58848817}
+  - component: {fileID: 58848820}
   m_Layer: 5
   m_Name: Throws
   m_TagString: Untagged
@@ -1714,6 +1715,18 @@ MonoBehaviour:
   wisdomValueLabel: {fileID: 822511246}
   charismaValueLabel: {fileID: 424847385}
   character: {fileID: 0}
+--- !u!114 &58848820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 58848815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1fe796bdaf46b439b8e666ce93edc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DnD.UI.EnableWithCharacter
 --- !u!1 &59386378
 GameObject:
   m_ObjectHideFlags: 0
@@ -5813,6 +5826,7 @@ GameObject:
   - component: {fileID: 208626679}
   - component: {fileID: 208626678}
   - component: {fileID: 208626677}
+  - component: {fileID: 208626681}
   m_Layer: 5
   m_Name: Scroll Tab Buttons
   m_TagString: Untagged
@@ -5928,6 +5942,18 @@ MonoBehaviour:
     Content: {fileID: 931768193}
   - Button: {fileID: 383603442}
     Content: {fileID: 1337146146}
+--- !u!114 &208626681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208626675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1fe796bdaf46b439b8e666ce93edc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DnD.UI.EnableWithCharacter
 --- !u!1 &214873830
 GameObject:
   m_ObjectHideFlags: 0
@@ -15895,6 +15921,7 @@ GameObject:
   - component: {fileID: 519088330}
   - component: {fileID: 519088333}
   - component: {fileID: 519088331}
+  - component: {fileID: 519088334}
   m_Layer: 5
   m_Name: Inventory
   m_TagString: Untagged
@@ -15963,6 +15990,18 @@ MonoBehaviour:
   cols: 7
   rootContent: {fileID: 1221672470}
   itemPrefab: {fileID: 165133439}
+--- !u!114 &519088334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519088329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1fe796bdaf46b439b8e666ce93edc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DnD.UI.EnableWithCharacter
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -22279,8 +22318,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1197287054}
   m_HandleRect: {fileID: 1197287053}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 0.9999985
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -42657,6 +42696,7 @@ GameObject:
   - component: {fileID: 1331206515}
   - component: {fileID: 1331206519}
   - component: {fileID: 1331206518}
+  - component: {fileID: 1331206520}
   m_Layer: 5
   m_Name: Skills
   m_TagString: Untagged
@@ -42777,6 +42817,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1331206520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1331206512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1fe796bdaf46b439b8e666ce93edc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DnD.UI.EnableWithCharacter
 --- !u!1 &1331784702
 GameObject:
   m_ObjectHideFlags: 0
@@ -43082,7 +43134,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -399.99994, y: 0}
+  m_AnchoredPosition: {x: -400, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1336614450
