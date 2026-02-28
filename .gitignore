@@ -97,3 +97,14 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# custom files
+*.keystore
+.collabignore
+/.plastic/
+/.vsconfig/
+/BackUp/
+/Bugs/
+/Screenshots/
+/Stuff/
+/Console/

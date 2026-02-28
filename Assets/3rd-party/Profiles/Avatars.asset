@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93be0d69a5aceb0439d27e01b4902791, type: 3}
+  m_Name: Avatars
+  m_EditorClassIdentifier: Assembly-CSharp::DnD.Profiles.AvatarsProfile
+  avatars:
+  - {fileID: 21300000, guid: b04ca7402a0fb7d49a5c7cf15e3243ae, type: 3}
+  - {fileID: 21300000, guid: 9d78ac2c6c8e9044da52b14c0570b334, type: 3}
+  - {fileID: 21300000, guid: 0fcf9677c06d32044a4f7c5785b4e248, type: 3}
+  - {fileID: 21300000, guid: 8ca1530b4f83995459e92d3e5daf3314, type: 3}
+  - {fileID: 21300000, guid: a595a15dbdd401744b8565f010069157, type: 3}
+  - {fileID: 21300000, guid: b1e9f27b3a3ce9844b2f49c1fcf93c2c, type: 3}
+  - {fileID: 21300000, guid: 2769d04b9a816ec4db595052817125f5, type: 3}
+  - {fileID: 21300000, guid: 551763adf42030e4aaab79b95ab7dd4e, type: 3}
+  - {fileID: 21300000, guid: 42b3d43b879367b408fe7cd532fad55b, type: 3}
