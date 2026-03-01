@@ -91,6 +91,12 @@ namespace DnD
         {
             _models.Remove(data);
             data.Delete();
+
+            if (ActiveCharacter == data)
+            {
+                ActiveCharacter = null;
+                SetActiveCharacter(GetNextCharacter());
+            }
         }
 
         public IReadOnlyList<CharacterData> GetCharacters()
@@ -162,7 +168,7 @@ namespace DnD
                 if (model == ActiveCharacter)
                 {
                     detected = true;
-                } else if (detected && model.isSelected)
+                } else if ((detected || ActiveCharacter == null) && model.isSelected)
                 {
                     return model;
                 }
@@ -182,7 +188,7 @@ namespace DnD
                 {
                     detected = true;
                 }
-                else if (detected && model.isSelected)
+                else if ((detected || ActiveCharacter == null) && model.isSelected)
                 {
                     return model;
                 }

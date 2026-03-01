@@ -17,6 +17,7 @@ namespace DnD.UI
         private GameObject errorText;
 
         protected List<ToggleCharacter> _items = new();
+        private TextEditor _editor;
 
         public void ButtonSave()
         {
@@ -37,7 +38,12 @@ namespace DnD.UI
             ClearItems();
             tooltipText.SetActive(false);
 
-            var buffer = UniClipboard.GetText();
+            //var buffer = UniClipboard.GetText();
+
+            _editor = _editor ?? new TextEditor();
+            _editor.Paste();
+            var buffer = _editor.text;
+
             try
             {
                 var list = JsonUtility.FromJson<ExportList>(buffer);
