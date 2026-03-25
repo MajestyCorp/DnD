@@ -1,4 +1,4 @@
-using DnD.Model.Inventory;
+п»їusing DnD.Model.Inventory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,15 +13,15 @@ namespace DnD.Model
         private static string FolderPath => Path.Combine(Application.persistentDataPath, "characters");
 
         public bool isSelected = false;
-        public string id;              // Уникальный ID персонажа (GUID)
-        public string name;            // Имя
-        public string race;            // Раса
-        public string characterClass;  // Класс
-        public string alignment;       // Мировоззрение
+        public string id;              // РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID РїРµСЂСЃРѕРЅР°Р¶Р° (GUID)
+        public string name;            // РРјСЏ
+        public string race;            // Р Р°СЃР°
+        public string characterClass;  // РљР»Р°СЃСЃ
+        public string alignment;       // РњРёСЂРѕРІРѕР·Р·СЂРµРЅРёРµ
         public bool isMale;
         public int avatarIndex;
 
-        // Основные характеристики (с модификаторами)
+        // РћСЃРЅРѕРІРЅС‹Рµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё (СЃ РјРѕРґРёС„РёРєР°С‚РѕСЂР°РјРё)
         public AttributeValue strength;
         public AttributeValue dexterity;
         public AttributeValue constitution;
@@ -29,10 +29,10 @@ namespace DnD.Model
         public AttributeValue wisdom;
         public AttributeValue charisma;
 
-        // Характеристики с текущим и максимальным значением
+        // РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё СЃ С‚РµРєСѓС‰РёРј Рё РјР°РєСЃРёРјР°Р»СЊРЅС‹Рј Р·РЅР°С‡РµРЅРёРµРј
         public StatValue hitPoints;
 
-        // Прочие характеристики (простые значения)
+        // РџСЂРѕС‡РёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё (РїСЂРѕСЃС‚С‹Рµ Р·РЅР°С‡РµРЅРёСЏ)
         public int avatarId = -1;
         public int armorClass = 10;
         public int initiative = 0;

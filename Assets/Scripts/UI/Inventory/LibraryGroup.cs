@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -46,13 +46,13 @@ namespace DnD.UI.Inventory
         {
             return itemType switch
             {
-                EItemType.Armor => "Броня",
-                EItemType.Consumable => "Расходные материалы",
-                EItemType.Instrument => "Инструменты",
-                EItemType.Jewerly => "Украшения",
-                EItemType.Quest => "Предметы квестов",
-                EItemType.Misc => "Разное",
-                _ => "Оружие",
+                EItemType.Armor => "Р‘СЂРѕРЅСЏ",
+                EItemType.Consumable => "Р Р°СЃС…РѕРґРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹",
+                EItemType.Instrument => "РРЅСЃС‚СЂСѓРјРµРЅС‚С‹",
+                EItemType.Jewerly => "РЈРєСЂР°С€РµРЅРёСЏ",
+                EItemType.Quest => "РџСЂРµРґРјРµС‚С‹ РєРІРµСЃС‚РѕРІ",
+                EItemType.Misc => "Р Р°Р·РЅРѕРµ",
+                _ => "РћСЂСѓР¶РёРµ",
             };
         }
 

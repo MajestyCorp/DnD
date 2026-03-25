@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -96,13 +96,13 @@ namespace DnD.Model.Inventory
         {
             return this.type switch
             {
-                EItemType.Armor => "Броня",
-                EItemType.Consumable => "Расходные материалы",
-                EItemType.Instrument => "Инструменты",
-                EItemType.Jewerly => "Украшения",
-                EItemType.Quest => "Предметы квестов",
-                EItemType.Misc => "Разное",
-                _ => "Оружие",
+                EItemType.Armor => "Р‘СЂРѕРЅСЏ",
+                EItemType.Consumable => "Р Р°СЃС…РѕРґРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹",
+                EItemType.Instrument => "РРЅСЃС‚СЂСѓРјРµРЅС‚С‹",
+                EItemType.Jewerly => "РЈРєСЂР°С€РµРЅРёСЏ",
+                EItemType.Quest => "РџСЂРµРґРјРµС‚С‹ РєРІРµСЃС‚РѕРІ",
+                EItemType.Misc => "Р Р°Р·РЅРѕРµ",
+                _ => "РћСЂСѓР¶РёРµ",
             };
         }
 
@@ -110,12 +110,12 @@ namespace DnD.Model.Inventory
         {
             return rarity switch
             {
-                EItemRarity.Uncommon => "Необычная",
-                EItemRarity.Rare => "Редкая",
-                EItemRarity.Mythical => "Мистическая",
-                EItemRarity.Legendary => "Легендарная",
-                EItemRarity.Artifact => "Артифакт",
-                _ => "Обычная",
+                EItemRarity.Uncommon => "РќРµРѕР±С‹С‡РЅР°СЏ",
+                EItemRarity.Rare => "Р РµРґРєР°СЏ",
+                EItemRarity.Mythical => "РњРёСЃС‚РёС‡РµСЃРєР°СЏ",
+                EItemRarity.Legendary => "Р›РµРіРµРЅРґР°СЂРЅР°СЏ",
+                EItemRarity.Artifact => "РђСЂС‚РёС„Р°РєС‚",
+                _ => "РћР±С‹С‡РЅР°СЏ",
             };
         }
 
