@@ -69,15 +69,6 @@ namespace DnD.Model
         {
             try
             {
-                File.WriteAllText(Path.Combine(Application.persistentDataPath, "test.file"), "TEST");
-                Debug.LogError($"SAVE TEST FILE OK");
-            } catch (Exception e)
-            {
-                Debug.LogError($"SAVE TEST FILE: " + e);
-            }
-
-            try
-            {
                 if (!Directory.Exists(FolderPath))
                     Directory.CreateDirectory(FolderPath);
             } catch (Exception e)
