@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,55 +12,49 @@ namespace DnD.Model
 
         public SkillAttributes()
         {
-            attributes = new Dictionary<string, SkillAttribute>
-            {
-                { Normalize("Акробатика"), new SkillAttribute() },
-                { Normalize("Анализ"), new SkillAttribute() },
-                { Normalize("Атлетика"), new SkillAttribute() },
-                { Normalize("Внимательность"), new SkillAttribute() },
-                { Normalize("Выживание"), new SkillAttribute() },
-                { Normalize("Выступление"), new SkillAttribute() },
-                { Normalize("Запугивание"), new SkillAttribute() },
-                { Normalize("История"), new SkillAttribute() },
-                { Normalize("Ловкость рук"), new SkillAttribute() },
-                { Normalize("Магия"), new SkillAttribute() },
-                { Normalize("Медицина"), new SkillAttribute() },
-                { Normalize("Обман"), new SkillAttribute() },
-                { Normalize("Природа"), new SkillAttribute() },
-                { Normalize("Проницательность"), new SkillAttribute() },
-                { Normalize("Религия"), new SkillAttribute() },
-                { Normalize("Скрытность"), new SkillAttribute() },
-                { Normalize("Убеждение"), new SkillAttribute() },
-                { Normalize("Уход за животными"), new SkillAttribute() },
-            };
-        }
+            attributes = new Dictionary<string, SkillAttribute>();
 
-        private string Normalize(string s)
-        {
-            return s.Normalize(NormalizationForm.FormC);
+            attributes.TryAdd("РђРєСЂРѕР±Р°С‚РёРєР°", new SkillAttribute());
+            attributes.TryAdd("РђРЅР°Р»РёР·", new SkillAttribute());
+            attributes.TryAdd("РђС‚Р»РµС‚РёРєР°", new SkillAttribute());
+            attributes.TryAdd("Р’РЅРёРјР°С‚РµР»СЊРЅРѕСЃС‚СЊ", new SkillAttribute());
+            attributes.TryAdd("Р’С‹Р¶РёРІР°РЅРёРµ", new SkillAttribute());
+            attributes.TryAdd("Р’С‹СЃС‚СѓРїР»РµРЅРёРµ", new SkillAttribute());
+            attributes.TryAdd("Р—Р°РїСѓРіРёРІР°РЅРёРµ", new SkillAttribute());
+            attributes.TryAdd("РСЃС‚РѕСЂРёСЏ", new SkillAttribute());
+            attributes.TryAdd("Р›РѕРІРєРѕСЃС‚СЊ СЂСѓРє", new SkillAttribute());
+            attributes.TryAdd("РњР°РіРёСЏ", new SkillAttribute());
+            attributes.TryAdd("РњРµРґРёС†РёРЅР°", new SkillAttribute());
+            attributes.TryAdd("РћР±РјР°РЅ", new SkillAttribute());
+            attributes.TryAdd("РџСЂРёСЂРѕРґР°", new SkillAttribute());
+            attributes.TryAdd("РџСЂРѕРЅРёС†Р°С‚РµР»СЊРЅРѕСЃС‚СЊ", new SkillAttribute());
+            attributes.TryAdd("Р РµР»РёРіРёСЏ", new SkillAttribute());
+            attributes.TryAdd("РЎРєСЂС‹С‚РЅРѕСЃС‚СЊ", new SkillAttribute());
+            attributes.TryAdd("РЈР±РµР¶РґРµРЅРёРµ", new SkillAttribute());
+            attributes.TryAdd("РЈС…РѕРґ Р·Р° Р¶РёРІРѕС‚РЅС‹РјРё", new SkillAttribute());
         }
 
         public void Invalidate(CharacterData data)
         {
             var throws = data.throws;
-            attributes[Normalize("Акробатика")].Invalidate(throws.dexterity);
-            attributes[Normalize("Анализ")].Invalidate(throws.intelligence);
-            attributes[Normalize("Атлетика")].Invalidate(throws.strength);
-            attributes[Normalize("Внимательность")].Invalidate(throws.wisdom);
-            attributes[Normalize("Выживание")].Invalidate(throws.wisdom);
-            attributes[Normalize("Выступление")].Invalidate(throws.charisma);
-            attributes[Normalize("Запугивание")].Invalidate(throws.charisma);
-            attributes[Normalize("История")].Invalidate(throws.intelligence);
-            attributes[Normalize("Ловкость рук")].Invalidate(throws.dexterity);
-            attributes[Normalize("Магия")].Invalidate(throws.intelligence);
-            attributes[Normalize("Медицина")].Invalidate(throws.wisdom);
-            attributes[Normalize("Обман")].Invalidate(throws.charisma);
-            attributes[Normalize("Природа")].Invalidate(throws.intelligence);
-            attributes[Normalize("Проницательность")].Invalidate(throws.wisdom);
-            attributes[Normalize("Религия")].Invalidate(throws.intelligence);
-            attributes[Normalize("Скрытность")].Invalidate(throws.dexterity);
-            attributes[Normalize("Убеждение")].Invalidate(throws.charisma);
-            attributes[Normalize("Уход за животными")].Invalidate(throws.wisdom);
+            attributes["РђРєСЂРѕР±Р°С‚РёРєР°"].Invalidate(throws.dexterity);
+            attributes["РђРЅР°Р»РёР·"].Invalidate(throws.intelligence);
+            attributes["РђС‚Р»РµС‚РёРєР°"].Invalidate(throws.strength);
+            attributes["Р’РЅРёРјР°С‚РµР»СЊРЅРѕСЃС‚СЊ"].Invalidate(throws.wisdom);
+            attributes["Р’С‹Р¶РёРІР°РЅРёРµ"].Invalidate(throws.wisdom);
+            attributes["Р’С‹СЃС‚СѓРїР»РµРЅРёРµ"].Invalidate(throws.charisma);
+            attributes["Р—Р°РїСѓРіРёРІР°РЅРёРµ"].Invalidate(throws.charisma);
+            attributes["РСЃС‚РѕСЂРёСЏ"].Invalidate(throws.intelligence);
+            attributes["Р›РѕРІРєРѕСЃС‚СЊ СЂСѓРє"].Invalidate(throws.dexterity);
+            attributes["РњР°РіРёСЏ"].Invalidate(throws.intelligence);
+            attributes["РњРµРґРёС†РёРЅР°"].Invalidate(throws.wisdom);
+            attributes["РћР±РјР°РЅ"].Invalidate(throws.charisma);
+            attributes["РџСЂРёСЂРѕРґР°"].Invalidate(throws.intelligence);
+            attributes["РџСЂРѕРЅРёС†Р°С‚РµР»СЊРЅРѕСЃС‚СЊ"].Invalidate(throws.wisdom);
+            attributes["Р РµР»РёРіРёСЏ"].Invalidate(throws.intelligence);
+            attributes["РЎРєСЂС‹С‚РЅРѕСЃС‚СЊ"].Invalidate(throws.dexterity);
+            attributes["РЈР±РµР¶РґРµРЅРёРµ"].Invalidate(throws.charisma);
+            attributes["РЈС…РѕРґ Р·Р° Р¶РёРІРѕС‚РЅС‹РјРё"].Invalidate(throws.wisdom);
         }
     }
 }
