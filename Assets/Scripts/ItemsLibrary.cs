@@ -100,7 +100,14 @@ namespace DnD
             });
 
             string path = Path.Combine(Application.persistentDataPath, "items.json");
-            File.WriteAllText(path, json);
+
+            try
+            {
+                File.WriteAllText(path, json);
+            } catch (Exception e)
+            {
+                Debug.LogError($"SAVE ITEMS ERROR: PATH {path}, " + e);
+            }
         }
 
         private void OnApplicationQuit()

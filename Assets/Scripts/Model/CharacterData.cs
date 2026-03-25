@@ -67,8 +67,14 @@ namespace DnD.Model
 
         public void Save()
         {
-            if (!Directory.Exists(FolderPath))
-                Directory.CreateDirectory(FolderPath);
+            try
+            {
+                if (!Directory.Exists(FolderPath))
+                    Directory.CreateDirectory(FolderPath);
+            } catch (Exception e)
+            {
+                Debug.LogError($"SAVE ERROR: FOLDER CREATION " + FolderPath + ", " + e);
+            }
 
             var json = JsonConvert.SerializeObject(this, Formatting.None, new JsonSerializerSettings
             {
@@ -77,7 +83,15 @@ namespace DnD.Model
 
             //var json = JsonUtility.ToJson(this, true);
             string path = Path.Combine(FolderPath, $"hero_{this.id}.json");
-            File.WriteAllText(path, json);
+
+            try
+            {
+                File.WriteAllText(path, json);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SAVE ERROR: JSON SAVE. PATH {path}, " + e);
+            }
         }
 
         public static CharacterData Load(string id)
