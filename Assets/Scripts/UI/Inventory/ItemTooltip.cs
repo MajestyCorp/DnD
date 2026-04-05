@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using System;
+using UnityEngine.InputSystem;
 
 namespace DnD.UI.Inventory
 {
@@ -64,6 +65,10 @@ namespace DnD.UI.Inventory
         private Action<Item> onDeleteCallback;
         private Action<Item> onIncCallback;
         private Action<Item> onEditedCallback;
+
+        protected bool IsMousePressed => Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+
+        protected bool IsTouchPressed => Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
 
         public void Initialize(RectTransform target, Item item, bool isTemplate = false)
         {
@@ -206,9 +211,11 @@ namespace DnD.UI.Inventory
 
         private void Update()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
             {
-                if (!RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition, canvas.worldCamera))
+                Vector2 pos = Pointer.current.position.ReadValue();
+
+                if (!RectTransformUtility.RectangleContainsScreenPoint(rect, pos, canvas.worldCamera))
                 {
                     Hide();
                 }

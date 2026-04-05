@@ -67,7 +67,8 @@ void EvaluateLight_float(float4 faceColor, float3 n, out float4 color)
 	col *= 1 - (dot(n, light) * _Diffuse);
 	col *= lerp(_Ambient, 1, n.z * n.z);
 
-	//fixed4 reflcol = texCUBE(_Cube, reflect(input.viewDir, -n));
+	//fixed4 reflcol = texCUBE(_Cube, reflect(
+	// viewDir, -n));
 	//faceColor.rgb += reflcol.rgb * lerp(_ReflectFaceColor.rgb, _ReflectOutlineColor.rgb, saturate(sd + outline * 0.5)) * faceColor.a;
 
 	color = float4(col, faceColor.a);
