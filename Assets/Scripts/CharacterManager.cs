@@ -53,13 +53,16 @@ namespace DnD
             OnSetActiveCharacter?.Invoke(ActiveCharacter);
         }
 
-        public CharacterData CreateCharacter(string name, string race, string charClass, bool isMale, int avatarIndex)
+        public CharacterData CreateCharacter(string name, string race, string charClass, bool isMale, int avatarIndex,
+            string raceId = null, string characterClassId = null)
         {
             var newChar = new CharacterData
             {
                 name = name,
                 race = race,
                 characterClass = charClass,
+                raceId = raceId,
+                characterClassId = characterClassId,
                 level = 1,
                 experience = 0,
                 armorClass = 10,

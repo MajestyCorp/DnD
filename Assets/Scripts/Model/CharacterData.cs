@@ -1,4 +1,4 @@
-﻿using DnD.Model.Inventory;
+using DnD.Model.Inventory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,8 +25,10 @@ namespace DnD.Model
         public bool isSelected = false;
         public string id;              // Уникальный ID персонажа (GUID)
         public string name;            // Имя
-        public string race;            // Раса
-        public string characterClass;  // Класс
+        public string race;            // Display name; raceId identifies the catalog entry.
+        public string characterClass;  // Display name; characterClassId identifies the catalog entry.
+        public string raceId;
+        public string characterClassId;
         public string alignment;       // Мировоззрение
         public bool isMale;
         public int avatarIndex;

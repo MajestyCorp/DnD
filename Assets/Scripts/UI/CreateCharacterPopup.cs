@@ -1,3 +1,4 @@
+using DnD.Profiles;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -16,9 +17,14 @@ namespace DnD.UI
         [SerializeField]
         private TMP_InputField inputName;
         [SerializeField]
-        private TMP_InputField inputRace;
+        private CharacterOptionsProfile optionsProfile;
         [SerializeField]
-        private TMP_InputField inputClass;
+        private TMP_Dropdown raceDropdown;
+        [SerializeField]
+        private TMP_Dropdown classDropdown;
+
+        private readonly CharacterOptionDropdown raceChoice = new();
+        private readonly CharacterOptionDropdown classChoice = new();
 
         private void OnEnable()
         {
@@ -28,60 +34,57 @@ namespace DnD.UI
         private void ResetForm()
         {
             toggleMale.isOn = true;
-            inputName.text = inputRace.text = inputClass.text = "";
+            inputName.text = "";
+            raceChoice.Initialize(raceDropdown, optionsProfile != null ? optionsProfile.Races : null);
+            classChoice.Initialize(classDropdown, optionsProfile != null ? optionsProfile.Classes : null);
             avatar.Invalidate(null);
             avatar.SetEditMode(true);
         }
 
         public void ButtonCreate()
         {
-            SoundManager.Instance.PlayClick();
-
             if (!IsValidated())
             {
+                SoundManager.Instance.PlayNegative();
                 return;
             }
 
-            var hero = CharacterManager.Instance.CreateCharacter(inputName.text, inputRace.text, inputClass.text, toggleMale.isOn, avatar.CurrentIndex);
+            SoundManager.Instance.PlayClick();
+            var race = raceChoice.Selection;
+            var characterClass = classChoice.Selection;
+            var hero = CharacterManager.Instance.CreateCharacter(inputName.text, race.displayName,
+                characterClass.displayName, toggleMale.isOn, avatar.CurrentIndex, race.id, characterClass.id);
             if (hero == null)
                 return;
             CharacterManager.Instance.SetActiveCharacter(hero);
 
-            this.ButtonHide();
-            this.ForceShowEvent();
+            ButtonHide();
+            ForceShowEvent();
         }
 
         private bool IsValidated()
         {
-            if (string.IsNullOrEmpty(inputName.text))
+            if (string.IsNullOrWhiteSpace(inputName.text))
             {
-                EventSystem.current.SetSelectedGameObject(inputName.gameObject);
+                EventSystem.current?.SetSelectedGameObject(inputName.gameObject);
                 return false;
             }
-
-            if (string.IsNullOrEmpty(inputRace.text))
+            if (raceChoice.Selection == null)
             {
-                EventSystem.current.SetSelectedGameObject(inputRace.gameObject);
+                if (raceDropdown != null)
+                    EventSystem.current?.SetSelectedGameObject(raceDropdown.gameObject);
                 return false;
             }
-
-            if (string.IsNullOrEmpty(inputClass.text))
+            if (classChoice.Selection == null)
             {
-                EventSystem.current.SetSelectedGameObject(inputClass.gameObject);
+                if (classDropdown != null)
+                    EventSystem.current?.SetSelectedGameObject(classDropdown.gameObject);
                 return false;
             }
-
             return true;
         }
 
-        public void ButtonLeft()
-        {
-            SoundManager.Instance.PlayClick();
-        }
-
-        public void ButtonRight()
-        {
-            SoundManager.Instance.PlayClick();
-        }
+        public void ButtonLeft() { SoundManager.Instance.PlayClick(); }
+        public void ButtonRight() { SoundManager.Instance.PlayClick(); }
     }
 }

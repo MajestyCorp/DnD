@@ -9,9 +9,11 @@ namespace UnityEngine
 {
     [AttributeUsage(AttributeTargets.Field)] public class SerializeField : Attribute { }
     [AttributeUsage(AttributeTargets.Field)] public class HeaderAttribute : Attribute { public HeaderAttribute(string value) { } }
+    public enum FindObjectsInactive { Include }
     public class Object
     {
         public string name;
+        public static T FindFirstObjectByType<T>(FindObjectsInactive inactive) where T : Object => null;
         public static T Instantiate<T>(T original, Transform parent) where T : Component, new()
         {
             var clone = new T();
@@ -27,6 +29,12 @@ namespace UnityEngine
         public static void Destroy(GameObject value) { value.SetActive(false); value.transform.SetParent(null); }
         public static implicit operator bool(Object value) => value != null;
     }
+    public class ScriptableObject : Object
+    {
+        public static T CreateInstance<T>() where T : ScriptableObject, new() => new T();
+    }
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CreateAssetMenuAttribute : Attribute { public string fileName; public string menuName; }
     public class Component : Object
     {
         internal GameObject owner;
@@ -113,8 +121,13 @@ namespace UnityEngine
     public struct Color { public Color(float r, float g, float b, float a) { } }
     public class Sprite { }
 }
+namespace UnityEngine.EventSystems
+{
+    public class EventSystem { public static EventSystem current; public void SetSelectedGameObject(UnityEngine.GameObject value) { } }
+}
 namespace UnityEngine.UI
 {
+    public class Toggle : UnityEngine.Component { public bool isOn; }
     public class Button : UnityEngine.Component { public bool interactable; }
     public class Image : UnityEngine.Component { public UnityEngine.Sprite sprite; }
     public class ScrollRect : UnityEngine.Component { public float verticalNormalizedPosition; }
@@ -137,7 +150,16 @@ namespace TMPro
 {
     public class TMP_Text : UnityEngine.Component { public string text; }
     public class TMP_InputField : UnityEngine.Component { public string text = ""; }
-    public class TMP_Dropdown : UnityEngine.Component { public int value; }
+    public class TMP_Dropdown : UnityEngine.Component
+    {
+        public class OptionData { public string text; }
+        public readonly List<OptionData> options = new();
+        public int value;
+        public void ClearOptions() { options.Clear(); value = 0; }
+        public void AddOptions(List<string> labels) { options.AddRange(labels.Select(label => new OptionData { text = label })); }
+        public void SetValueWithoutNotify(int selected) => value = selected;
+        public void RefreshShownValue() { }
+    }
 }
 namespace DnD.UI
 {
@@ -146,12 +168,21 @@ namespace DnD.UI
         public static void Popup(string title, SkillAttribute attribute, int masteryBonus, Action callback) { }
     }
     public class ConfirmPopup { public static bool TryShowMessage(string value) => true; }
+    public class Avatar : UnityEngine.Component
+    {
+        public int CurrentIndex => 0;
+        public void Invalidate(CharacterData data) { }
+        public void SetEditMode(bool value) { }
+    }
     public class Frame : UnityEngine.MonoBehaviour
     {
         protected virtual void OnShowAction() { }
-        public void ButtonShow() => OnShowAction();
-        public void ButtonHide() { }
-        public void Hide() { }
+        public bool IsVisible;
+        public void Show() { IsVisible = true; OnShowAction(); }
+        public void ButtonShow() => Show();
+        public void ButtonHide() => Hide();
+        public void Hide() { IsVisible = false; }
+        public void ForceShowEvent() { }
     }
     public class ToggleCharacter : UnityEngine.Component
     {

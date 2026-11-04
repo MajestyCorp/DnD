@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.EventSystems;
 using DnD.Model;
+using DnD.Profiles;
 using System;
 
 namespace DnD.UI
@@ -18,59 +18,58 @@ namespace DnD.UI
         [SerializeField]
         private TMP_InputField inputName;
         [SerializeField]
-        private TMP_InputField inputRace;
+        private CharacterOptionsProfile optionsProfile;
         [SerializeField]
-        private TMP_InputField inputClass;
+        private TMP_Dropdown raceDropdown;
+        [SerializeField]
+        private TMP_Dropdown classDropdown;
 
-        private Action _callback;
+        private readonly CharacterOptionDropdown raceChoice = new();
+        private readonly CharacterOptionDropdown classChoice = new();
+        private CharacterData character;
+        private Action callback;
 
         public static void Popup(Action callback)
         {
             if (Instance == null)
-            {
                 Instance = UnityEngine.Object.FindFirstObjectByType<EditCharacterPopup>(FindObjectsInactive.Include);
-            }
-
             Instance.InitPopup(CharacterManager.Instance.ActiveCharacter, callback);
         }
 
         private void InitPopup(CharacterData data, Action callback)
         {
-            _callback = callback;
-
-            if (data.isMale)
-            {
-                toggleFemale.isOn = false;
-                toggleMale.isOn = true;
-            }
-            else
-            {
-                toggleMale.isOn = false;
-                toggleFemale.isOn = true;
-            }
-
+            if (data == null)
+                return;
+            character = data;
+            this.callback = callback;
+            toggleMale.isOn = data.isMale;
+            toggleFemale.isOn = !data.isMale;
             inputName.text = data.name;
-            inputRace.text = data.race;
-            inputClass.text = data.characterClass;
-
+            raceChoice.Initialize(raceDropdown, optionsProfile != null ? optionsProfile.Races : null, data.raceId);
+            classChoice.Initialize(classDropdown, optionsProfile != null ? optionsProfile.Classes : null, data.characterClassId);
             Show();
         }
 
         public void ButtonSave()
         {
+            var race = raceChoice.Selection;
+            var characterClass = classChoice.Selection;
+            if (character == null || string.IsNullOrWhiteSpace(inputName.text) || race == null || characterClass == null)
+            {
+                SoundManager.Instance.PlayNegative();
+                return;
+            }
             SoundManager.Instance.PlayClick();
+            character.name = inputName.text;
+            character.raceId = race.id;
+            character.race = race.displayName;
+            character.characterClassId = characterClass.id;
+            character.characterClass = characterClass.displayName;
+            character.isMale = toggleMale.isOn;
+            if (!character.Save())
+                return;
 
-            var data = CharacterManager.Instance.ActiveCharacter;
-
-            data.name = inputName.text;
-            data.race = inputRace.text;
-            data.characterClass = inputClass.text;
-            data.isMale = toggleMale.isOn;
-
-            data.Save();
-
-            _callback?.Invoke();
-
+            callback?.Invoke();
             Hide();
         }
     }

@@ -6,6 +6,7 @@ using System.Reflection;
 using DnD;
 using DnD.Model;
 using DnD.Model.Inventory;
+using DnD.Profiles;
 using DnD.UI;
 using DnD.UI.Tabs;
 using Newtonsoft.Json;
@@ -22,6 +23,66 @@ static class Program
         Directory.CreateDirectory(TestRoot);
         try
         {
+            Test("Dropdown choices follow stable IDs through rename and reorder", () =>
+            {
+                var dropdown = new TMPro.TMP_Dropdown();
+                var choice = new CharacterOptionDropdown();
+                var wizard = new CharacterOption { id = "wizard", displayName = "Волшебник" };
+                var cleric = new CharacterOption { id = "cleric", displayName = "Жрец" };
+                choice.Initialize(dropdown, new[] { wizard, cleric }, "wizard");
+                Equal("wizard", choice.Selection.id); Equal(1, dropdown.value);
+                wizard.displayName = "Wizard";
+                choice.Initialize(dropdown, new[] { cleric, wizard }, "wizard");
+                Equal("wizard", choice.Selection.id); Equal(2, dropdown.value); Equal("Wizard", dropdown.options[2].text);
+                choice.Initialize(dropdown, new[] { wizard }, "Old free text");
+                Equal(0, dropdown.value); Equal<CharacterOption>(null, choice.Selection);
+            });
+            Test("Empty dropdowns and invalid catalog entries cannot become selections", () =>
+            {
+                var choice = new CharacterOptionDropdown(); var dropdown = new TMPro.TMP_Dropdown();
+                choice.Initialize(dropdown, new CharacterOption[]
+                {
+                    null, new() { id = "", displayName = "Empty ID" },
+                    new() { id = "wizard", displayName = "Wizard" }, new() { id = "wizard", displayName = "Duplicate" }
+                });
+                Equal(2, dropdown.options.Count); Equal<CharacterOption>(null, choice.Selection);
+                dropdown.value = 1; Equal("wizard", choice.Selection.id);
+                dropdown.value = 99; Equal<CharacterOption>(null, choice.Selection);
+                choice.Initialize(null, null); Equal<CharacterOption>(null, choice.Selection);
+            });
+            Test("Create form saves catalog race/class IDs and display names", () =>
+            {
+                SetSaveFolder("catalog-create"); var lib = new ItemsLibrary(); lib.InitializeSelf(); var manager = MakeManager();
+                var popup = new CreateCharacterPopup();
+                Set(popup, "avatar", new Avatar()); Set(popup, "toggleMale", new Toggle()); Set(popup, "inputName", new TMPro.TMP_InputField());
+                Set(popup, "raceDropdown", new TMPro.TMP_Dropdown()); Set(popup, "classDropdown", new TMPro.TMP_Dropdown());
+                Set(popup, "optionsProfile", MakeCharacterOptions());
+                Call(popup, "ResetForm"); Get<TMPro.TMP_InputField>(popup, "inputName").text = "New Hero";
+                popup.ButtonCreate(); Equal(0, manager.GetCharacters().Count);
+                Get<TMPro.TMP_Dropdown>(popup, "raceDropdown").value = 1; Get<TMPro.TMP_Dropdown>(popup, "classDropdown").value = 1;
+                popup.ButtonCreate();
+                var hero = CharacterData.Load(manager.ActiveCharacter.id);
+                Equal("human", hero.raceId); Equal("Человек", hero.race); Equal("wizard", hero.characterClassId); Equal("Волшебник", hero.characterClass);
+            });
+            Test("Edit form requires old text to be selected again and restores catalog IDs later", () =>
+            {
+                SetSaveFolder("catalog-edit");
+                var old = new CharacterData { name = "Old Hero", race = "Человек", characterClass = "Волшебник" };
+                var popup = new EditCharacterPopup();
+                Set(popup, "toggleMale", new Toggle()); Set(popup, "toggleFemale", new Toggle()); Set(popup, "inputName", new TMPro.TMP_InputField());
+                Set(popup, "raceDropdown", new TMPro.TMP_Dropdown()); Set(popup, "classDropdown", new TMPro.TMP_Dropdown());
+                Set(popup, "optionsProfile", MakeCharacterOptions());
+                Call(popup, "InitPopup", old, null);
+                Equal(0, Get<TMPro.TMP_Dropdown>(popup, "raceDropdown").value);
+                Equal(0, Get<TMPro.TMP_Dropdown>(popup, "classDropdown").value);
+                popup.ButtonSave(); Equal<string>(null, old.characterClassId); Check(popup.IsVisible);
+                Get<TMPro.TMP_Dropdown>(popup, "raceDropdown").value = 1; Get<TMPro.TMP_Dropdown>(popup, "classDropdown").value = 1;
+                popup.ButtonSave(); Equal(false, popup.IsVisible);
+                var loaded = CharacterData.Load(old.id); Equal("human", loaded.raceId); Equal("wizard", loaded.characterClassId);
+                Call(popup, "InitPopup", loaded, null);
+                Equal(1, Get<TMPro.TMP_Dropdown>(popup, "raceDropdown").value);
+                Equal(1, Get<TMPro.TMP_Dropdown>(popup, "classDropdown").value);
+            });
             Test("XP thresholds match all twenty D&D 5e levels", () =>
             {
                 var thresholds = new[]
@@ -376,6 +437,13 @@ static class Program
     private static CharacterManager MakeManager()
     {
         var manager = new CharacterManager(); Set(manager, "leftButton", new Button()); Set(manager, "rightButton", new Button()); manager.InitializeSelf(); return manager;
+    }
+    private static CharacterOptionsProfile MakeCharacterOptions()
+    {
+        var profile = ScriptableObject.CreateInstance<CharacterOptionsProfile>();
+        Set(profile, "races", new List<CharacterOption> { new() { id = "human", displayName = "Человек" } });
+        Set(profile, "classes", new List<CharacterOption> { new() { id = "wizard", displayName = "Волшебник" } });
+        return profile;
     }
     private static ToggleCharacter Toggle(CharacterData hero) { var toggle = new ToggleCharacter(); toggle.Init(hero); toggle.SetToggle(true); return toggle; }
     private static ImportPopup MakeImporter()

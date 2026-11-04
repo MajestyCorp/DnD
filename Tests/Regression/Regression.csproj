@@ -21,6 +21,10 @@
     <Compile Include="../../Assets/Scripts/UI/ImportPopup.cs" Link="Source/ImportPopup.cs" />
     <Compile Include="../../Assets/Scripts/UI/ExportPopup.cs" Link="Source/ExportPopup.cs" />
     <Compile Include="../../Assets/Scripts/UI/SkillItem.cs" Link="Source/SkillItem.cs" />
+    <Compile Include="../../Assets/Scripts/Profiles/CharacterOptionsProfile.cs" Link="Source/CharacterOptionsProfile.cs" />
+    <Compile Include="../../Assets/Scripts/UI/CharacterOptionDropdown.cs" Link="Source/CharacterOptionDropdown.cs" />
+    <Compile Include="../../Assets/Scripts/UI/CreateCharacterPopup.cs" Link="Source/CreateCharacterPopup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/EditCharacterPopup.cs" Link="Source/EditCharacterPopup.cs" />
     <Compile Include="../../Assets/Scripts/UI/TabGroup.cs" Link="Source/TabGroup.cs" />
     <Compile Include="../../Assets/Scripts/UI/Tabs/CharacterTabGroup.cs" Link="Source/CharacterTabGroup.cs" />
   </ItemGroup>
