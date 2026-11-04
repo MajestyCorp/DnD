@@ -9,6 +9,10 @@ namespace DnD.Model
         public int baseValue;
         public int modifier;
         public bool auto = true;
+        public int bonus;
+
+        [Newtonsoft.Json.JsonIgnore]
+        public int TotalModifier => modifier + bonus;
 
         public AttributeValue(int baseValue = 10, int modifier = 0, bool auto = true)
         {
@@ -24,7 +28,7 @@ namespace DnD.Model
 
         public override string ToString()
         {
-            return baseValue.ToString() + "+" + modifier;
+            return baseValue.ToString() + (TotalModifier >= 0 ? "+" : "") + TotalModifier;
         }
     }
 }

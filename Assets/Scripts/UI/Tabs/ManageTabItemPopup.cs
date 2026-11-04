@@ -201,7 +201,8 @@ namespace DnD.UI.Tabs
                     spellCells.level = cantripToggle.isOn
                         ? 0
                         : (int.TryParse(levelInput.text, out var levelValue) ? levelValue : 1);
-                    spellCells.maxSlots = int.TryParse(cellsAmountInput.text, out var cellsValue) ? cellsValue : 1;
+                    spellCells.level = Mathf.Max(0, spellCells.level);
+                    spellCells.maxSlots = Mathf.Max(0, int.TryParse(cellsAmountInput.text, out var cellsValue) ? cellsValue : 1);
                     spellCells.usedSlots = Mathf.Min(spellCells.usedSlots, spellCells.maxSlots);
 
                     break;

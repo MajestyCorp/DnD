@@ -22,7 +22,7 @@ namespace DnD.UI
         public void ButtonClick()
         {
             SoundManager.Instance.PlayClick();
-            UpdatePropPopup.Popup(this.name, attribute, SaveData);
+            UpdatePropPopup.Popup(this.name, attribute, character.masteryBonus, SaveData);
         }
 
         public void SetEditable(bool value)
@@ -32,6 +32,7 @@ namespace DnD.UI
 
         private void SaveData()
         {
+            character.Recalculate();
             Invalidate(this.name, attribute, character);
             character.Save();
         }
@@ -42,7 +43,7 @@ namespace DnD.UI
             this.attribute = attribute;
             this.character = character;
 
-            border.SetActive(attribute.master);
+            border.SetActive(attribute.master || SkillAttributes.IsRelatedAbilitySelected(character, name));
             valueText.text = attribute.ToString();
             labelText.text = name;
         }

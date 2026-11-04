@@ -19,7 +19,7 @@ namespace DnD.Model
 
         public void Invalidate(AttributeValue attribute, int bonus)
         {
-            baseValue = master ? attribute.modifier + bonus : attribute.modifier;
+            baseValue = master ? attribute.TotalModifier + bonus : attribute.TotalModifier;
             baseValue += modifier;
         }
 

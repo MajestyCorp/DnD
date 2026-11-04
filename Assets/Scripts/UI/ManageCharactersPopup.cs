@@ -43,7 +43,6 @@ namespace DnD.UI
                     continue;
                 }
 
-                item.Character.isSelected = item.IsOn;
 
                 if (item.IsOn && first == null)
                 {
@@ -54,7 +53,12 @@ namespace DnD.UI
             if (first == null)
                 return false;
 
-            CharacterManager.Instance.SaveAll();
+            foreach (var item in _items)
+                if (item.gameObject.activeSelf)
+                    item.Character.isSelected = item.IsOn;
+
+            if (!CharacterManager.Instance.SaveAll())
+                return false;
             CharacterManager.Instance.SetActiveCharacter(first);
             return true;
         }

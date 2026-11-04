@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
-using DnD.Converters;
+using System.Runtime.Serialization;
 
 namespace DnD.Model
 {
@@ -12,6 +12,8 @@ namespace DnD.Model
     public class CharacterData
     {
         private static string FolderPath => Path.Combine(Application.persistentDataPath, "characters");
+
+        public int dataVersion = 1;
 
         public bool isSelected = false;
         public string id;              // Уникальный ID персонажа (GUID)
@@ -79,67 +81,137 @@ namespace DnD.Model
             return armorClass.ToString() + '+' + armorClassInc.ToString();
         }
 
-        public void Save()
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context)
+        {
+            // Old files do not contain a version field.
+            dataVersion = 0;
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            ValidateAndNormalize();
+        }
+
+        public void ValidateAndNormalize()
+        {
+            if (!Guid.TryParse(id, out _))
+                throw new JsonSerializationException("Invalid character ID.");
+            if (dataVersion > 1)
+                throw new JsonSerializationException("Unsupported character version.");
+
+            strength ??= new AttributeValue();
+            dexterity ??= new AttributeValue();
+            constitution ??= new AttributeValue();
+            intelligence ??= new AttributeValue();
+            wisdom ??= new AttributeValue();
+            charisma ??= new AttributeValue();
+            hitPoints ??= new StatValue();
+            throws ??= new ThrowAttributes();
+            throws.strength ??= new ThrowAttribute();
+            throws.dexterity ??= new ThrowAttribute();
+            throws.constitution ??= new ThrowAttribute();
+            throws.intelligence ??= new ThrowAttribute();
+            throws.wisdom ??= new ThrowAttribute();
+            throws.charisma ??= new ThrowAttribute();
+            skills ??= new SkillAttributes();
+            skills.Normalize();
+            items ??= new List<Item>();
+            tabs ??= new List<TabData>();
+            foreach (var item in items)
+                item?.Normalize();
+            foreach (var tab in tabs)
+            {
+                if (tab == null)
+                    throw new JsonSerializationException("Tab cannot be null.");
+                tab.items ??= new List<TabContent>();
+                foreach (var content in tab.items)
+                {
+                    if (content == null)
+                        throw new JsonSerializationException("Tab content cannot be null.");
+                    if (content is SpellCellsContent slots)
+                    {
+                        slots.level = Mathf.Max(0, slots.level);
+                        slots.maxSlots = Mathf.Max(0, slots.maxSlots);
+                        slots.usedSlots = Mathf.Clamp(slots.usedSlots, 0, slots.maxSlots);
+                    }
+                }
+            }
+
+            if (dataVersion == 0)
+            {
+                // Preserve the old skill totals: the old calculation included save-specific bonuses.
+                skills.MigrateLegacyModifiers(this);
+                dataVersion = 1;
+            }
+            Recalculate();
+        }
+
+        public void Recalculate()
+        {
+            foreach (var attribute in new[] { strength, dexterity, constitution, intelligence, wisdom, charisma })
+                if (attribute.auto)
+                    attribute.CalculateModifier();
+            throws.Invalidate(this);
+            skills.Invalidate(this);
+        }
+
+        public bool Save()
         {
             try
             {
-                if (!Directory.Exists(FolderPath))
-                    Directory.CreateDirectory(FolderPath);
-            } catch (Exception e)
-            {
-                Debug.LogError($"SAVE ERROR: FOLDER CREATION " + FolderPath + ", " + e);
+                ValidateAndNormalize();
+                return JsonStorage.Write(Path.Combine(FolderPath, $"hero_{id}.json"), this);
             }
-
-            var settings = new JsonSerializerSettings
+            catch (Exception exception)
             {
-                NullValueHandling = NullValueHandling.Include
-            };
-
-            var json = JsonConvert.SerializeObject(this, Formatting.None, settings);
-
-            //var json = JsonUtility.ToJson(this, true);
-            string path = Path.Combine(FolderPath, $"hero_{this.id}.json");
-
-            try
-            {
-                File.WriteAllText(path, json);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"SAVE ERROR: JSON SAVE. PATH {path}, " + e);
+                Debug.LogError(exception);
+                JsonStorage.Notify("Не удалось сохранить персонажа. Проверьте его данные и попробуйте ещё раз.");
+                return false;
             }
         }
 
         public static CharacterData Load(string id)
         {
-            string path = Path.Combine(FolderPath, $"hero_{id}.json");
-            if (!File.Exists(path)) return null;
+            if (!Guid.TryParse(id, out _))
+                return null;
+            return LoadPath(Path.Combine(FolderPath, $"hero_{id}.json"));
+        }
 
-            var settings = new JsonSerializerSettings();
-            settings.Converters.Add(new TabContentConverter());
-
-            string json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<CharacterData>(json, settings);
-            //return JsonUtility.FromJson<CharacterData>(json);
+        private static CharacterData LoadPath(string path)
+        {
+            return JsonStorage.Read(path, json =>
+            {
+                var character = JsonStorage.Deserialize<CharacterData>(json);
+                if (Path.GetFileName(path) != $"hero_{character.id}.json")
+                    throw new JsonSerializationException("Character ID does not match its file.");
+                return character;
+            });
         }
 
         public static List<CharacterData> LoadAll()
         {
-            if (!Directory.Exists(FolderPath))
-                return new List<CharacterData>();
-
-            var settings = new JsonSerializerSettings();
-            settings.Converters.Add(new TabContentConverter());
-
-            var files = Directory.GetFiles(FolderPath, "hero_*.json");
             var list = new List<CharacterData>();
-            foreach (var file in files)
+            if (!Directory.Exists(FolderPath))
+                return list;
+
+            try
             {
-                string json = File.ReadAllText(file);
-                var data = JsonConvert.DeserializeObject<CharacterData>(json, settings);
-                //var data = JsonUtility.FromJson<CharacterData>(json);
-                if (data != null)
-                    list.Add(data);
+                var files = new SortedSet<string>(Directory.GetFiles(FolderPath, "hero_*.json"));
+                foreach (var backup in Directory.GetFiles(FolderPath, "hero_*.json.bak"))
+                    files.Add(backup.Substring(0, backup.Length - 4));
+                foreach (var file in files)
+                {
+                    var data = LoadPath(file);
+                    if (data != null)
+                        list.Add(data);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(exception);
+                JsonStorage.Notify("Не удалось прочитать папку персонажей. Попробуйте открыть приложение ещё раз.");
             }
             return list;
         }
@@ -152,7 +224,7 @@ namespace DnD.Model
             {
                 var item = items[i];
 
-                if (item == null || !item.ID.Equals(source.ID))
+                if (item == null || !string.Equals(item.ID, source.ID, StringComparison.Ordinal))
                     continue;
 
                 item.SyncModelFrom(source);
@@ -163,11 +235,9 @@ namespace DnD.Model
                 Save();
         }
 
-        public void Delete()
+        public bool Delete()
         {
-            string path = Path.Combine(FolderPath, $"hero_{this.id}.json");
-            if (File.Exists(path))
-                File.Delete(path);
+            return JsonStorage.Delete(Path.Combine(FolderPath, $"hero_{id}.json"));
         }
     }
 }

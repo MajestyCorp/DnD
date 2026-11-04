@@ -9,6 +9,8 @@ namespace DnD.Converters
 {
     public class TabContentConverter : JsonConverter<TabContent>
     {
+        public override bool CanWrite => false;
+
         public override TabContent ReadJson(
             JsonReader reader,
             Type objectType,
@@ -16,9 +18,14 @@ namespace DnD.Converters
             bool hasExistingValue,
             JsonSerializer serializer)
         {
+            if (reader.TokenType == JsonToken.Null)
+                throw new JsonSerializationException("Tab content cannot be null.");
+
             JObject obj = JObject.Load(reader);
 
-            EContentType type = obj["contentType"].ToObject<EContentType>();
+            var typeToken = obj["contentType"]
+                ?? throw new JsonSerializationException("Tab content type is missing.");
+            EContentType type = typeToken.ToObject<EContentType>();
 
             TabContent item = TabContent.Factory(type);
             serializer.Populate(obj.CreateReader(), item);
@@ -28,7 +35,7 @@ namespace DnD.Converters
 
         public override void WriteJson(JsonWriter writer, TabContent value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value);
+            throw new NotSupportedException("Use the default writer for tab content.");
         }
     }
 }

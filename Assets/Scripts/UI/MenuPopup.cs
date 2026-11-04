@@ -10,7 +10,8 @@ namespace DnD.UI
         public void ButtonExit()
         {
             SoundManager.Instance.PlayClick();
-            CharacterManager.Instance.SaveAll();
+            if (!CharacterManager.Instance.SaveAll())
+                return;
             Application.Quit();
         }
 

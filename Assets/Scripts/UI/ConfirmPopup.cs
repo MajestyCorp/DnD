@@ -23,6 +23,17 @@ namespace DnD.UI
             Instance.InitPopup(text, callback);
         }
 
+        public static bool TryShowMessage(string message)
+        {
+            if (Instance == null)
+                Instance = UnityEngine.Object.FindFirstObjectByType<ConfirmPopup>(FindObjectsInactive.Include);
+            if (Instance == null || Instance.IsVisible)
+                return false;
+
+            Instance.InitPopup(message, null);
+            return true;
+        }
+
         protected void InitPopup(string text, Action callback)
         {
             this.text.text = text;

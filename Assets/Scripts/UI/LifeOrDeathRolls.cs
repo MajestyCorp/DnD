@@ -22,6 +22,12 @@ namespace DnD.UI
             Invalidate(CharacterManager.Instance.ActiveCharacter);
         }
 
+        private void OnDestroy()
+        {
+            if (CharacterManager.Instance != null)
+                CharacterManager.Instance.OnSetActiveCharacter -= OnSetActiveCharacter;
+        }
+
         private void OnSetActiveCharacter(CharacterData data)
         {
             Invalidate(data);

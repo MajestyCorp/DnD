@@ -43,6 +43,8 @@ namespace DnD.UI
             }
 
             var hero = CharacterManager.Instance.CreateCharacter(inputName.text, inputRace.text, inputClass.text, toggleMale.isOn, avatar.CurrentIndex);
+            if (hero == null)
+                return;
             CharacterManager.Instance.SetActiveCharacter(hero);
 
             this.ButtonHide();

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
@@ -84,7 +84,7 @@ namespace DnD.UI
         private Action callback;
         private Action<int, int?> intCallback;
 
-        public static void Popup(string title, SkillAttribute attribute, Action callback)
+        public static void Popup(string title, SkillAttribute attribute, int masteryBonus, Action callback)
         {
             var instance = GetInstance();
 
@@ -92,6 +92,7 @@ namespace DnD.UI
             instance.title = title;
             instance.propMode = EUpdatePropMode.SkillAttribute;
             instance.skillAttribute = attribute;
+            instance.intValue = masteryBonus;
             instance.callback = callback;
             instance.Init();
         }
@@ -162,12 +163,17 @@ namespace DnD.UI
 
             InvalidateItems(propMode);
             InvalidateValues(propMode);
+            OnModifierValueChange(modifierValueInput.text);
 
             this.Show();
         }
 
         private void InvalidateItems(EUpdatePropMode mode)
         {
+            var modifierLabel = modifierValuePanel.Find("Label")?.GetComponent<TMP_Text>();
+            if (modifierLabel != null)
+                modifierLabel.text = mode == EUpdatePropMode.Attribute ? "Бонус" : "Модификатор";
+
             currentValuePanel.gameObject.SetActive(
                 mode == EUpdatePropMode.Attribute ||
                 mode == EUpdatePropMode.CurrentStat ||
@@ -195,6 +201,7 @@ namespace DnD.UI
                 mode == EUpdatePropMode.SkillAttribute
             );
             modifierValuePanel.gameObject.SetActive(
+                mode == EUpdatePropMode.Attribute ||
                 mode == EUpdatePropMode.ThrowAttribute ||
                 mode == EUpdatePropMode.SkillAttribute ||
                 (mode == EUpdatePropMode.IntValue && intIncValue != null)
@@ -218,7 +225,8 @@ namespace DnD.UI
                     SetCurrentValue(attributeValue.baseValue);
                     SetModificatorValue(attributeValue.modifier);
                     InvalidateModificatorPanel(attributeValue.auto);
-                    modificatorToggle.isOn = attributeValue.auto;
+                    modificatorToggle.SetIsOnWithoutNotify(attributeValue.auto);
+                    SetInputValue(modifierValueInput, attributeValue.bonus);
                     break;
                 case EUpdatePropMode.CurrentStat:
                 case EUpdatePropMode.MaxStat:
@@ -246,6 +254,7 @@ namespace DnD.UI
                     break;
                 case EUpdatePropMode.SkillAttribute:
                     SetInputValue(readOnlyValueInput, skillAttribute.baseValue);
+                    SetToggle(masterToggle, skillAttribute.master);
                     SetInputValue(modifierValueInput, skillAttribute.modifier);
                     break;
             }
@@ -379,7 +388,7 @@ namespace DnD.UI
 
         private void SetToggle(Toggle toggle, bool value)
         {
-            toggle.isOn = value;
+            toggle.SetIsOnWithoutNotify(value);
         }
 
         private int GetInputValue(TMP_InputField input)
@@ -408,15 +417,7 @@ namespace DnD.UI
             var value = GetInputValue(modifierValueInput);
             SetInputValue(modifierValueInput, --value);
 
-            switch(propMode)
-            {
-                case EUpdatePropMode.ThrowAttribute:
-                    SetInputValue(readOnlyValueInput, throwAttribute.GetOriginalValue() + value);
-                    break;
-                case EUpdatePropMode.SkillAttribute:
-                    SetInputValue(readOnlyValueInput, skillAttribute.GetOriginalValue() + value);
-                    break;
-            }
+            OnModifierValueChange(modifierValueInput.text);
         }
 
         public void ButtonIncModifierValue()
@@ -425,15 +426,7 @@ namespace DnD.UI
             var value = GetInputValue(modifierValueInput);
             SetInputValue(modifierValueInput, ++value);
 
-            switch (propMode)
-            {
-                case EUpdatePropMode.ThrowAttribute:
-                    SetInputValue(readOnlyValueInput, throwAttribute.GetOriginalValue() + value);
-                    break;
-                case EUpdatePropMode.SkillAttribute:
-                    SetInputValue(readOnlyValueInput, skillAttribute.GetOriginalValue() + value);
-                    break;
-            }
+            OnModifierValueChange(modifierValueInput.text);
         }
         #endregion
 
@@ -446,6 +439,7 @@ namespace DnD.UI
                     attributeValue.baseValue = GetCurrentValue();
                     attributeValue.modifier = GetModificatorValue();
                     attributeValue.auto = modificatorToggle.isOn;
+                    attributeValue.bonus = GetInputValue(modifierValueInput);
                     callback.Invoke();
                     break;
                 case EUpdatePropMode.CurrentStat:
@@ -468,6 +462,7 @@ namespace DnD.UI
                 case EUpdatePropMode.SkillAttribute:
                     skillAttribute.baseValue = GetInputValue(readOnlyValueInput);
                     skillAttribute.modifier = GetInputValue(modifierValueInput);
+                    skillAttribute.master = masterToggle.isOn;
                     callback.Invoke();
                     break;
             }
@@ -496,22 +491,15 @@ namespace DnD.UI
 
         public void OnModifierValueChange(string text)
         {
-            var value = GetInputValue(modifierValueInput);
-            switch (propMode)
-            {
-                case EUpdatePropMode.ThrowAttribute:
-                    var points = throwAttribute.GetOriginalValue() + value;
-                    if (throwAttribute.master)
-                        points -= intValue;
-
-                    points += masterToggle.isOn ? intValue : 0;
-                    SetInputValue(readOnlyValueInput, points);
-                    break;
-                case EUpdatePropMode.SkillAttribute:
-                    SetInputValue(readOnlyValueInput, value + skillAttribute.GetOriginalValue());
-                    break;
-            }
-
+            if (propMode != EUpdatePropMode.ThrowAttribute && propMode != EUpdatePropMode.SkillAttribute)
+                return;
+            var oldValue = propMode == EUpdatePropMode.ThrowAttribute
+                ? throwAttribute.GetOriginalValue() : skillAttribute.GetOriginalValue();
+            var wasMaster = propMode == EUpdatePropMode.ThrowAttribute
+                ? throwAttribute.master : skillAttribute.master;
+            var points = oldValue + GetInputValue(modifierValueInput)
+                + ((masterToggle.isOn ? 1 : 0) - (wasMaster ? 1 : 0)) * intValue;
+            SetInputValue(readOnlyValueInput, points);
         }
 
         public void OnModificatorToggleChanged(bool value)
@@ -524,14 +512,7 @@ namespace DnD.UI
         public void OnMasterToggleChanged(bool value)
         {
             SoundManager.Instance.PlayClick();
-            var points = throwAttribute.GetOriginalValue() + GetInputValue(modifierValueInput);
-            if (throwAttribute.master)
-            {
-                points -= intValue;
-            }
-
-            points += value ? intValue : 0;
-            SetInputValue(readOnlyValueInput, points);
+            OnModifierValueChange(modifierValueInput.text);
         }
 
         private void InvalidateModificatorPanel(bool autoCalc)

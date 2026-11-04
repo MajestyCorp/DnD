@@ -23,6 +23,7 @@ namespace DnD.UI.Tabs
         [SerializeField]
         private Transform buttonManage;
 
+        private bool editable;
         private CharacterData characterData = null;
 
         private List<TitleButton> tabButtons = new();
@@ -35,6 +36,12 @@ namespace DnD.UI.Tabs
             Invalidate(CharacterManager.Instance.ActiveCharacter);
         }
 
+        private void OnDestroy()
+        {
+            if (CharacterManager.Instance != null)
+                CharacterManager.Instance.OnSetActiveCharacter -= OnSetActiveCharacter;
+        }
+
         private void OnSetActiveCharacter(CharacterData data)
         {
             Invalidate(data);
@@ -42,12 +49,17 @@ namespace DnD.UI.Tabs
 
         private void Invalidate(CharacterData data)
         {
+            var selected = SelectedTab;
+            var selectedDynamicIndex = activeContent != null ? tabContents.IndexOf(activeContent) : -1;
+            var sameCharacter = characterData != null && data != null && characterData.id == data.id;
             characterData = data;
 
             ClearTabs();
+            SetEditable(editable);
 
             if (data == null)
             {
+                SelectTab(defaultSelectedTab);
                 return;
             }
 
@@ -58,7 +70,7 @@ namespace DnD.UI.Tabs
                 tabButtons.Add(button);
 
                 var content = AddContent(tab);
-                content.SetEditable(false);
+                content.SetEditable(editable);
                 tabContents.Add(content);
             }
 
@@ -68,26 +80,38 @@ namespace DnD.UI.Tabs
                 var button = tabButtons[i];
                 button.transform.SetSiblingIndex(tab.index);
             }
+
+            SetEditable(editable);
+            if (sameCharacter && selectedDynamicIndex >= 0 && selectedDynamicIndex < tabButtons.Count)
+                SelectTab(tabButtons[selectedDynamicIndex].GetComponent<TabButton>());
+            else if (selected != null && selectedDynamicIndex < 0)
+                SelectTab(selected);
+            else
+                SelectTab(defaultSelectedTab);
         }
 
         private void ClearTabs()
         {
             for (var i = 0; i < tabButtons.Count; i++)
             {
+                tabButtons[i].gameObject.SetActive(false);
                 Destroy(tabButtons[i].gameObject);
             }
             tabButtons.Clear();
 
             for (var i=0; i < tabContents.Count; i++)
             {
+                tabContents[i].gameObject.SetActive(false);
                 Destroy(tabContents[i].gameObject);
             }
             tabContents.Clear();
+            activeContent = null;
         }
 
         public void SetEditable(bool value)
         {
-            buttonAdd.gameObject.SetActive(value);
+            editable = value;
+            buttonAdd.gameObject.SetActive(value && characterData != null);
             buttonManage.gameObject.SetActive(value && tabContents.Count > 0);
 
             for(var i=0;i<tabContents.Count;i++)
@@ -124,14 +148,15 @@ namespace DnD.UI.Tabs
 
             //make new tab active
             SelectTab(button.GetComponent<TabButton>());
-            content.SetEditable(true);
+            SetEditable(editable);
+            characterData.Save();
         }
 
         protected override void UpdateTab(TabButton tab)
         {
             base.UpdateTab(tab);
 
-            activeContent = GetActiveContent(tab.gameObject);
+            activeContent = tab != null ? GetActiveContent(tab.gameObject) : null;
             UpdateContentStates(activeContent);
         }
 
@@ -240,6 +265,7 @@ namespace DnD.UI.Tabs
                 }
             }
 
+            SetEditable(editable);
             characterData.Save();
         }
     }

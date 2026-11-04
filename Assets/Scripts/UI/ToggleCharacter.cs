@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 using UnityEngine.UI;
 using TMPro;
 using DnD.Model;
@@ -41,7 +42,8 @@ namespace DnD.UI
         private void ConfirmDelete()
         {
             CharacterManager.Instance.Delete(Character);
-            gameObject.SetActive(false);
+            if (!CharacterManager.Instance.GetCharacters().Contains(Character))
+                gameObject.SetActive(false);
         }
 
         private void FillData(CharacterData character)

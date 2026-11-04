@@ -17,7 +17,6 @@ namespace DnD.UI
         private GameObject errorText;
 
         protected List<ToggleCharacter> _items = new();
-        private TextEditor _editor;
 
         public void ButtonSave()
         {
@@ -38,19 +37,26 @@ namespace DnD.UI
             ClearItems();
             tooltipText.SetActive(false);
 
-            //var buffer = UniClipboard.GetText();
-
-            _editor = _editor ?? new TextEditor();
-            _editor.Paste();
-            var buffer = _editor.text;
+            errorText.SetActive(false);
 
             try
             {
-                var list = JsonUtility.FromJson<ExportList>(buffer);
+                var list = JsonStorage.Deserialize<ExportList>(GUIUtility.systemCopyBuffer);
+                if (list.items == null || list.items.Count == 0)
+                    throw new Newtonsoft.Json.JsonSerializationException("No characters to import.");
+                var ids = new HashSet<string>();
+                foreach (var character in list.items)
+                {
+                    if (character == null || !ids.Add(character.id))
+                        throw new Newtonsoft.Json.JsonSerializationException("Invalid or duplicate character.");
+                    character.ValidateAndNormalize();
+                }
                 BuildItems(list.items);
             }
             catch (Exception e)
             {
+                Debug.LogWarning(e);
+                ClearItems();
                 errorText.SetActive(true);
                 return;
             }
@@ -88,13 +94,20 @@ namespace DnD.UI
 
         private bool SaveItems()
         {
+            if (!CharacterManager.Instance.SaveAll())
+                return false;
             var saved = false;
             for (var i = 0; i < _items.Count; i++)
             {
                 var item = _items[i];
                 if (item.gameObject.activeSelf && item.IsOn)
                 {
-                    item.Character.Save();
+                    if (!item.Character.Save())
+                    {
+                        if (saved)
+                            CharacterManager.Instance.Refresh();
+                        return false;
+                    }
                     saved = true;
                 }
             }

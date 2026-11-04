@@ -34,27 +34,65 @@ namespace DnD.Model
             attributes.TryAdd("Уход за животными", new SkillAttribute());
         }
 
+        public void Normalize()
+        {
+            var defaults = new SkillAttributes().attributes;
+            attributes ??= new Dictionary<string, SkillAttribute>();
+            foreach (var key in defaults.Keys)
+                if (!attributes.TryGetValue(key, out var value) || value == null)
+                    attributes[key] = defaults[key];
+        }
+
+        public void MigrateLegacyModifiers(CharacterData data)
+        {
+            foreach (var pair in attributes)
+            {
+                var savingThrow = GetRelatedSavingThrow(data, pair.Key);
+                if (savingThrow == null)
+                    continue;
+                pair.Value.modifier += savingThrow.modifier
+                    + ((savingThrow.master ? 1 : 0) - (pair.Value.master ? 1 : 0)) * data.masteryBonus;
+            }
+        }
+
+        public static bool IsRelatedAbilitySelected(CharacterData data, string skill)
+        {
+            return data != null && GetRelatedSavingThrow(data, skill)?.master == true;
+        }
+
+        private static ThrowAttribute GetRelatedSavingThrow(CharacterData data, string skill)
+        {
+            return skill switch
+            {
+                "Атлетика" => data.throws.strength,
+                "Акробатика" or "Ловкость рук" or "Скрытность" => data.throws.dexterity,
+                "Анализ" or "История" or "Магия" or "Природа" or "Религия" => data.throws.intelligence,
+                "Внимательность" or "Выживание" or "Медицина" or "Проницательность" or "Уход за животными" => data.throws.wisdom,
+                "Выступление" or "Запугивание" or "Обман" or "Убеждение" => data.throws.charisma,
+                _ => null
+            };
+        }
+
         public void Invalidate(CharacterData data)
         {
-            var throws = data.throws;
-            attributes["Акробатика"].Invalidate(throws.dexterity);
-            attributes["Анализ"].Invalidate(throws.intelligence);
-            attributes["Атлетика"].Invalidate(throws.strength);
-            attributes["Внимательность"].Invalidate(throws.wisdom);
-            attributes["Выживание"].Invalidate(throws.wisdom);
-            attributes["Выступление"].Invalidate(throws.charisma);
-            attributes["Запугивание"].Invalidate(throws.charisma);
-            attributes["История"].Invalidate(throws.intelligence);
-            attributes["Ловкость рук"].Invalidate(throws.dexterity);
-            attributes["Магия"].Invalidate(throws.intelligence);
-            attributes["Медицина"].Invalidate(throws.wisdom);
-            attributes["Обман"].Invalidate(throws.charisma);
-            attributes["Природа"].Invalidate(throws.intelligence);
-            attributes["Проницательность"].Invalidate(throws.wisdom);
-            attributes["Религия"].Invalidate(throws.intelligence);
-            attributes["Скрытность"].Invalidate(throws.dexterity);
-            attributes["Убеждение"].Invalidate(throws.charisma);
-            attributes["Уход за животными"].Invalidate(throws.wisdom);
+            attributes["Акробатика"].Invalidate(data.dexterity, data.masteryBonus);
+            attributes["Анализ"].Invalidate(data.intelligence, data.masteryBonus);
+            attributes["Атлетика"].Invalidate(data.strength, data.masteryBonus);
+            attributes["Внимательность"].Invalidate(data.wisdom, data.masteryBonus);
+            attributes["Выживание"].Invalidate(data.wisdom, data.masteryBonus);
+            attributes["Выступление"].Invalidate(data.charisma, data.masteryBonus);
+            attributes["Запугивание"].Invalidate(data.charisma, data.masteryBonus);
+            attributes["История"].Invalidate(data.intelligence, data.masteryBonus);
+            attributes["Ловкость рук"].Invalidate(data.dexterity, data.masteryBonus);
+            attributes["Магия"].Invalidate(data.intelligence, data.masteryBonus);
+            attributes["Медицина"].Invalidate(data.wisdom, data.masteryBonus);
+            attributes["Обман"].Invalidate(data.charisma, data.masteryBonus);
+            attributes["Природа"].Invalidate(data.intelligence, data.masteryBonus);
+            attributes["Проницательность"].Invalidate(data.wisdom, data.masteryBonus);
+            attributes["Религия"].Invalidate(data.intelligence, data.masteryBonus);
+            attributes["Скрытность"].Invalidate(data.dexterity, data.masteryBonus);
+            attributes["Убеждение"].Invalidate(data.charisma, data.masteryBonus);
+            attributes["Уход за животными"].Invalidate(data.wisdom, data.masteryBonus);
         }
     }
 }

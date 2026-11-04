@@ -105,7 +105,7 @@ namespace DnD.UI.Inventory
             var lastFilledIndex = GetLastFilledItemIndex(items);
             var emptyCells = GetEmptyItems(items);
             var extraLine = emptyCells < cols ? 1 : 0;
-            var minRows = Mathf.Max(Mathf.CeilToInt(lastFilledIndex / 7f) + extraLine, this.minRows);
+            var minRows = Mathf.Max(Mathf.CeilToInt((lastFilledIndex + 1) / (float)cols) + extraLine, this.minRows);
 
             return minRows;
         }

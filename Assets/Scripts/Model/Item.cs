@@ -119,9 +119,20 @@ namespace DnD.Model.Inventory
             };
         }
 
+        public void Normalize()
+        {
+            if (string.IsNullOrWhiteSpace(ID))
+                throw new Newtonsoft.Json.JsonSerializationException("Item ID is missing.");
+            effects ??= new List<string>();
+            props ??= new List<ItemProp>();
+            props.RemoveAll(prop => prop == null);
+        }
+
         public void SyncModelFrom(Item source)
         {
-            if (!source.ID.Equals(ID))
+            if (ReferenceEquals(this, source))
+                return;
+            if (source == null || !string.Equals(source.ID, ID, StringComparison.Ordinal))
                 return;
 
             name = source.name;

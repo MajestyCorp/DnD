@@ -13,6 +13,7 @@ namespace DnD.UI
 
         protected readonly List<TabButton> tabs = new();
         private TabButton selectedTab;
+        protected TabButton SelectedTab => selectedTab;
 
         public void Register(TabButton tab)
         {
@@ -33,9 +34,6 @@ namespace DnD.UI
 
         public void SelectTab(TabButton tab)
         {
-            if (selectedTab == tab)
-                return;
-
             selectedTab = tab;
 
             UpdateTab(tab);

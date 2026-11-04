@@ -12,7 +12,6 @@ namespace DnD.UI
         private RectTransform content;
 
         protected List<ToggleCharacter> _items = new();
-        private TextEditor _editor;
 
         public void ButtonExport()
         {
@@ -41,14 +40,9 @@ namespace DnD.UI
 
             if (list.items.Count > 0)
             {
-                var json = JsonUtility.ToJson(list, false);
+                var json = JsonStorage.Serialize(list);
 
-                _editor = _editor ?? new TextEditor();
-                _editor.text = json;
-                _editor.SelectAll();
-                _editor.Copy();
-
-                //UniClipboard.SetText(json);
+                GUIUtility.systemCopyBuffer = json;
 
                 return true;
             }
@@ -100,6 +94,7 @@ namespace DnD.UI
         }
     }
 
+    [System.Serializable]
     public class ExportList
     {
         public List<CharacterData> items = new();

@@ -9,6 +9,11 @@ namespace DnD
     /// </summary>
     public class Initializer : MonoBehaviour
     {
+        private void Update()
+        {
+            JsonStorage.ShowPendingMessage();
+        }
+
         private void Awake()
         {
             var array = GetComponentsInChildren<IInitializer>(true);

@@ -114,7 +114,7 @@ namespace DnD.UI
 
         public void ButtonCreate()
         {
-            ManageItemPopup.PopupCreate(OnCreatedCallback);
+            ManageItemPopup.PopupCreate(OnCreatedCallback, true);
         }
 
         private void OnCreatedCallback(Item item)

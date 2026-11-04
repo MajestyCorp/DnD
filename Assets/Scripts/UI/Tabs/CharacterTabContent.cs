@@ -80,7 +80,7 @@ namespace DnD.UI.Tabs
             addNewItemsText.gameObject.SetActive(!value && tabData.items.Count == 0);
             toolbar.gameObject.SetActive(value);
 
-            var items = transform.GetComponentsInChildren<TabItemUI>();
+            var items = transform.GetComponentsInChildren<TabItemUI>(true);
             if (items != null)
             {
                 for(var i=0;i<items.Length;i++)

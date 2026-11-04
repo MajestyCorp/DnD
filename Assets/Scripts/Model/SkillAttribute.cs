@@ -17,10 +17,9 @@ namespace DnD.Model
             this.master = master;
         }
 
-        public void Invalidate(ThrowAttribute attribute)
+        public void Invalidate(AttributeValue attribute, int masteryBonus)
         {
-            baseValue = attribute.baseValue + modifier;
-            master = attribute.master;
+            baseValue = attribute.TotalModifier + modifier + (master ? masteryBonus : 0);
         }
 
         public int GetOriginalValue()

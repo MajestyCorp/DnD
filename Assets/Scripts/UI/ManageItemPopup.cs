@@ -64,10 +64,12 @@ namespace DnD.UI
         private int iconId;
         private Item targetItem;
         private bool createMode;
+        private bool templateMode;
 
-        public static void PopupCreate(Action<Item> onCreatedItem)
+        public static void PopupCreate(Action<Item> onCreatedItem, bool isTemplate = false)
         {
             Instance.createMode = true;
+            Instance.templateMode = isTemplate;
             Instance.targetItem = null;
             Instance.callback = onCreatedItem;
             Instance.ButtonShow();
@@ -76,6 +78,7 @@ namespace DnD.UI
         public static void PopupEdit(Item item, Action<Item> onEditedItem)
         {
             Instance.createMode = false;
+            Instance.templateMode = ItemsLibrary.Instance.IsTemplate(item);
             Instance.targetItem = item;
             Instance.callback = onEditedItem;
             Instance.ButtonShow();
@@ -118,7 +121,7 @@ namespace DnD.UI
         {
             var t = (EItemType)value;
 
-            countContainer.SetActive(t == EItemType.Consumable);
+            countContainer.SetActive(!templateMode && t == EItemType.Consumable);
         }
 
         private System.Collections.IEnumerator RebuildLayout(float scroll = 0)
@@ -165,19 +168,18 @@ namespace DnD.UI
             if (string.IsNullOrEmpty(nameField.text))
                 return false;
 
-            if (typeDropdown.value == (int)EItemType.Consumable && 
-                (string.IsNullOrEmpty(countField.text) || int.Parse(countField.text) <= 0))
+            if (!templateMode && typeDropdown.value == (int)EItemType.Consumable &&
+                (!int.TryParse(countField.text, out var count) || count <= 0))
                 return false;
 
-            if (!string.IsNullOrEmpty(weightField.text) && float.Parse(weightField.text) < 0)
+            if (!string.IsNullOrEmpty(weightField.text) &&
+                (!float.TryParse(weightField.text, out var weight) || float.IsNaN(weight) || float.IsInfinity(weight) || weight < 0))
                 return false;
 
-            if (!string.IsNullOrEmpty(copperField.text) && int.Parse(copperField.text) < 0)
-                return false;
-            if (!string.IsNullOrEmpty(silverField.text) && int.Parse(silverField.text) < 0)
-                return false;
-            if (!string.IsNullOrEmpty(goldField.text) && int.Parse(goldField.text) < 0)
-                return false;
+            foreach (var input in new[] { copperField, silverField, goldField })
+                if (!string.IsNullOrEmpty(input.text) &&
+                    (!int.TryParse(input.text, out var value) || value < 0))
+                    return false;
 
             return true;
         }
@@ -193,7 +195,7 @@ namespace DnD.UI
             item.type = (EItemType) typeDropdown.value;
             item.rarity = (EItemRarity)rarityDropdown.value;
 
-            if (item.IsConsumable)
+            if (item.IsConsumable && !templateMode)
                 item.count = int.Parse(countField.text);
 
             if (!string.IsNullOrEmpty(weightField.text))
@@ -221,9 +223,10 @@ namespace DnD.UI
             item.icon_id = iconId;
             item.type = (EItemType)typeDropdown.value;
             item.rarity = (EItemRarity)rarityDropdown.value;
-            item.weight = item.count = item.costCopper = item.costSilver = item.costGold = 0;
+            item.weight = item.costCopper = item.costSilver = item.costGold = 0;
+            item.count = 1;
 
-            if (item.IsConsumable)
+            if (item.IsConsumable && !templateMode)
                 item.count = int.Parse(countField.text);
 
             if (!string.IsNullOrEmpty(weightField.text))
@@ -243,6 +246,7 @@ namespace DnD.UI
 
         private void FillEffects(Item item)
         {
+            item.effects.Clear();
             var count = effectsContainer.childCount;
 
             for (var i = 0; i < count; i++)
@@ -299,7 +303,7 @@ namespace DnD.UI
             itemIcon.sprite = null;
             itemIcon.sprite = profile.GetIcon(item.icon_group, item.icon_id);
 
-            countContainer.SetActive(item.IsConsumable);
+            countContainer.SetActive(!templateMode && item.IsConsumable);
 
             nameField.text = item.name;
             descriptionField.text = item.description;
@@ -338,7 +342,7 @@ namespace DnD.UI
             descriptionField.text = "";
             typeDropdown.value = 0;
             rarityDropdown.value = 0;
-            countField.text = "";
+            countField.text = "1";
             weightField.text = "";
             copperField.text = "";
             silverField.text = "";
@@ -359,6 +363,7 @@ namespace DnD.UI
                 if (!child.gameObject.activeSelf)
                     continue;
 
+                child.gameObject.SetActive(false);
                 Destroy(child.gameObject);
             }
         }

@@ -80,6 +80,8 @@ namespace DnD.UI
 
         private void OnReset()
         {
+            if (_character == null)
+                return;
             _character.hitPoints.current = _character.hitPoints.max;
             labelHealth.text = _character.hitPoints.ToString();
         }
@@ -87,6 +89,8 @@ namespace DnD.UI
         private void OnDestroy()
         {
             ResetSkills.OnReset -= OnReset;
+            if (CharacterManager.Instance != null)
+                CharacterManager.Instance.OnSetActiveCharacter -= OnSetActiveCharacter;
         }
 
         private void OnSetActiveCharacter(CharacterData data)
@@ -107,6 +111,7 @@ namespace DnD.UI
             if (data == null)
                 return;
 
+            data.Recalculate();
             heroNameLabel.text = data.name;
 
             labelStrength.text = data.strength.ToString();

@@ -30,6 +30,11 @@ namespace DnD
             _models = CharacterData.LoadAll();
             AmountOfActiveCharacters = GetAmountOfActiveCharacters();
             ActiveCharacter = GetCharacterById(activeId);
+            if (ActiveCharacter == null || !ActiveCharacter.isSelected)
+            {
+                ActiveCharacter = null;
+                ActiveCharacter = GetNextCharacter();
+            }
         }
 
         public void InitializeAfter()
@@ -67,8 +72,9 @@ namespace DnD
                 isSelected = true,
             };
 
+            if (!newChar.Save())
+                return null;
             _models.Add(newChar);
-            newChar.Save();
             return newChar;
         }
 
@@ -82,8 +88,14 @@ namespace DnD
             }
 
             _models = CharacterData.LoadAll();
+            InitializeAfter();
             AmountOfActiveCharacters = GetAmountOfActiveCharacters();
             ActiveCharacter = GetCharacterById(currentId);
+            if (ActiveCharacter == null || !ActiveCharacter.isSelected)
+            {
+                ActiveCharacter = null;
+                ActiveCharacter = GetNextCharacter();
+            }
 
             InvalidateButtons();
             OnSetActiveCharacter?.Invoke(ActiveCharacter);
@@ -91,13 +103,19 @@ namespace DnD
 
         public void Delete(CharacterData data)
         {
+            if (data == null || !data.Delete())
+                return;
             _models.Remove(data);
-            data.Delete();
 
             if (ActiveCharacter == data)
             {
                 ActiveCharacter = null;
                 SetActiveCharacter(GetNextCharacter());
+            }
+            else
+            {
+                AmountOfActiveCharacters = GetAmountOfActiveCharacters();
+                InvalidateButtons();
             }
         }
 
@@ -121,25 +139,45 @@ namespace DnD
 
         public void SetActiveCharacter(CharacterData character)
         {
-            if (ActiveCharacter != null && ActiveCharacter.id.CompareTo(character.id) != 0)
+            if (ActiveCharacter != null && ActiveCharacter != character)
             {
                 ActiveCharacter.Save();
             }
 
             ActiveCharacter = character;
             AmountOfActiveCharacters = GetAmountOfActiveCharacters();
-            PlayerPrefs.SetString("ActiveCharacterId", character.id);
+            PlayerPrefs.SetString("ActiveCharacterId", character?.id ?? "");
+            PlayerPrefs.Save();
 
             InvalidateButtons();
             OnSetActiveCharacter?.Invoke(character);
         }
 
-        public void SaveAll()
+        public bool SaveAll()
         {
+            var saved = true;
+            if (_models == null)
+                return false;
             foreach (var model in _models)
-            {
-                model.Save();
-            }
+                saved &= model.Save();
+            return saved;
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused)
+                SaveAll();
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused)
+                SaveAll();
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveAll();
         }
 
         public void ButtonPrev()

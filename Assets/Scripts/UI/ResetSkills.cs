@@ -9,6 +9,8 @@ namespace DnD.UI
 
         public void ButtonReset()
         {
+            if (CharacterManager.Instance.ActiveCharacter == null)
+                return;
             SoundManager.Instance.PlayClick();
             OnReset?.Invoke();
             CharacterManager.Instance.ActiveCharacter.Save();

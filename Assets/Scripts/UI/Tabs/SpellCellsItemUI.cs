@@ -38,6 +38,8 @@ namespace DnD.UI.Tabs
 
         private void OnSkillsReset()
         {
+            if (data == null)
+                return;
             data.usedSlots = 0;
 
             UpdateState();
