@@ -126,12 +126,12 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 41
-        width: 41
-        height: 7
+        y: 0
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 10, y: 0, z: 0, w: 0}
+      pivot: {x: 0, y: 0}
+      border: {x: 10, y: 10, z: 10, w: 10}
       customData: 
       outline: []
       physicsShape: []
@@ -139,116 +139,6 @@ TextureImporter:
       bones: []
       spriteID: 84489efbe68be11b0800000000000000
       internalID: -5683902893889321912
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: panel-border-004_1
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 41
-        height: 41
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a25f5e96371bfb8b0800000000000000
-      internalID: -5134189940923042518
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: panel-border-004_2
-      rect:
-        serializedVersion: 2
-        x: 41
-        y: 41
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9e5ed020fcb73def0800000000000000
-      internalID: -84587838966995479
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: panel-border-004_3
-      rect:
-        serializedVersion: 2
-        x: 41
-        y: 0
-        width: 7
-        height: 41
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 9, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5675da1ccddc859e0800000000000000
-      internalID: -1632328516895942811
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: panel-border-004_4
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 6
-        height: 48
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 9, z: 0, w: 9}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 48ca2e9d5f4b22c4aa2c327310c9eadc
-      internalID: -2038614598
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: panel-border-004_5
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 48
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 9, y: 0, z: 9, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 62d1f249005bd6749a312c8b052c65e6
-      internalID: -2082757021
       vertices: []
       indices: 
       edges: []

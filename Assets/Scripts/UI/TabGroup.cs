@@ -6,18 +6,23 @@ namespace DnD.UI
     public class TabGroup : MonoBehaviour
     {
         [SerializeField]
-        private TabButton defaultSelectedTab;
+        protected TabButton defaultSelectedTab;
 
         [SerializeField]
         private List<TabContent> contents;
 
-        private readonly List<TabButton> tabs = new();
+        protected readonly List<TabButton> tabs = new();
         private TabButton selectedTab;
 
         public void Register(TabButton tab)
         {
             if (!tabs.Contains(tab))
                 tabs.Add(tab);
+        }
+
+        public void Deregister(TabButton tab)
+        {
+            tabs.Remove(tab);
         }
 
         private void Start()
@@ -33,6 +38,11 @@ namespace DnD.UI
 
             selectedTab = tab;
 
+            UpdateTab(tab);
+        }
+
+        protected virtual void UpdateTab(TabButton tab)
+        {
             foreach (var t in tabs)
             {
                 t.SetSelected(t == tab);

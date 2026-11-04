@@ -19,6 +19,11 @@ namespace DnD.UI
 
             tabGroup.Register(this);
         }
+        protected override void OnDestroy()
+        {
+            if (tabGroup != null)
+                tabGroup.Deregister(this);
+        }
 
         public override void OnPointerClick(UnityEngine.EventSystems.PointerEventData eventData)
         {

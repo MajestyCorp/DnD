@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
+using DnD.Converters;
 
 namespace DnD.Model
 {
@@ -35,7 +36,9 @@ namespace DnD.Model
         // Прочие характеристики (простые значения)
         public int avatarId = -1;
         public int armorClass = 10;
+        public int armorClassInc = 0;
         public int initiative = 0;
+        public int initiativeInc = 0;
         public int level = 1;
         public int experience = 0;
         public int speed = 30;
@@ -49,6 +52,7 @@ namespace DnD.Model
         public int deathRolls = 0;
 
         public List<Item> items = new();
+        public List<TabData> tabs = new();
 
         public CharacterData()
         {
@@ -65,6 +69,16 @@ namespace DnD.Model
             items = new();
         }
 
+        public string GetInitiativeInfo()
+        {
+            return initiative.ToString() + '+' + initiativeInc.ToString();
+        }
+
+        public string GetArmorClassInfo()
+        {
+            return armorClass.ToString() + '+' + armorClassInc.ToString();
+        }
+
         public void Save()
         {
             try
@@ -76,10 +90,12 @@ namespace DnD.Model
                 Debug.LogError($"SAVE ERROR: FOLDER CREATION " + FolderPath + ", " + e);
             }
 
-            var json = JsonConvert.SerializeObject(this, Formatting.None, new JsonSerializerSettings
+            var settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Include
-            });
+            };
+
+            var json = JsonConvert.SerializeObject(this, Formatting.None, settings);
 
             //var json = JsonUtility.ToJson(this, true);
             string path = Path.Combine(FolderPath, $"hero_{this.id}.json");
@@ -99,8 +115,11 @@ namespace DnD.Model
             string path = Path.Combine(FolderPath, $"hero_{id}.json");
             if (!File.Exists(path)) return null;
 
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new TabContentConverter());
+
             string json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<CharacterData>(json);
+            return JsonConvert.DeserializeObject<CharacterData>(json, settings);
             //return JsonUtility.FromJson<CharacterData>(json);
         }
 
@@ -109,12 +128,15 @@ namespace DnD.Model
             if (!Directory.Exists(FolderPath))
                 return new List<CharacterData>();
 
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new TabContentConverter());
+
             var files = Directory.GetFiles(FolderPath, "hero_*.json");
             var list = new List<CharacterData>();
             foreach (var file in files)
             {
                 string json = File.ReadAllText(file);
-                var data = JsonConvert.DeserializeObject<CharacterData>(json);
+                var data = JsonConvert.DeserializeObject<CharacterData>(json, settings);
                 //var data = JsonUtility.FromJson<CharacterData>(json);
                 if (data != null)
                     list.Add(data);

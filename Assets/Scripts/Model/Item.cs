@@ -56,7 +56,7 @@ namespace DnD.Model.Inventory
             item.description = description;
             item.type = type;
             item.rarity = rarity;
-            item.count = count;
+            item.count = 1;
             item.weight = weight;
             item.costCopper = costCopper;
             item.costSilver = costSilver;

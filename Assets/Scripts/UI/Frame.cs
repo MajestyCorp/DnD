@@ -90,7 +90,7 @@ namespace DnD.UI
             if (_animationCoroutine != null)
                 StopCoroutine(_animationCoroutine);
 
-            gameObject.SetActive(true);
+            
             _animationCoroutine = StartCoroutine(ShowInternal());
         }
 
@@ -115,7 +115,7 @@ namespace DnD.UI
 
         protected virtual void OnShowAction()
         {
-
+            gameObject.SetActive(true);
         }
 
         protected virtual void OnHideAction()

@@ -1,4 +1,4 @@
-using DnD.Model.Inventory;
+п»їusing DnD.Model.Inventory;
 using DnD.Profiles;
 using System;
 using UnityEngine;
@@ -284,7 +284,7 @@ namespace DnD.UI
 
         private void UpdateUI()
         {
-            titleText.text = createMode ? "Создать\nпредмет" : "Изменить\nпредмет";
+            titleText.text = createMode ? "РЎРѕР·РґР°С‚СЊ\nРїСЂРµРґРјРµС‚" : "РР·РјРµРЅРёС‚СЊ\nРїСЂРµРґРјРµС‚";
             createButton.gameObject.SetActive(createMode);
             changeButton.gameObject.SetActive(!createMode);
         }

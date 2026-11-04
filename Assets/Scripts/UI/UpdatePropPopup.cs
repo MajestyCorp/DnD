@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
@@ -76,12 +76,13 @@ namespace DnD.UI
         private AttributeValue attributeValue;
         private StatValue statValue;
         private int intValue;
+        private int? intIncValue = null;
         private ThrowAttribute throwAttribute;
         private SkillAttribute skillAttribute;
         private EUpdatePropMode propMode;
 
         private Action callback;
-        private Action<int> intCallback;
+        private Action<int, int?> intCallback;
 
         public static void Popup(string title, SkillAttribute attribute, Action callback)
         {
@@ -132,7 +133,7 @@ namespace DnD.UI
             instance.Init();
         }
 
-        public static void Popup(string title, int attribute, bool addBehaviour, Action<int> callback)
+        public static void Popup(string title, int attribute, bool addBehaviour, Action<int, int?> callback, int? attributeInc = null)
         {
             var instance = GetInstance();
 
@@ -140,6 +141,7 @@ namespace DnD.UI
             instance.title = title;
             instance.propMode = EUpdatePropMode.IntValue;
             instance.intValue = attribute;
+            instance.intIncValue = attributeInc;
             instance.intCallback = callback;
             instance.Init();
         }
@@ -156,7 +158,7 @@ namespace DnD.UI
 
         private void Init()
         {
-            titleText.text = (addBehaviour ? "Äîáàâèòü " : "Èçìåíèòü ") + title;
+            titleText.text = (addBehaviour ? "Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ " : "Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ ") + title;
 
             InvalidateItems(propMode);
             InvalidateValues(propMode);
@@ -194,7 +196,8 @@ namespace DnD.UI
             );
             modifierValuePanel.gameObject.SetActive(
                 mode == EUpdatePropMode.ThrowAttribute ||
-                mode == EUpdatePropMode.SkillAttribute
+                mode == EUpdatePropMode.SkillAttribute ||
+                (mode == EUpdatePropMode.IntValue && intIncValue != null)
             );
             masterTogglePanel.gameObject.SetActive(mode == EUpdatePropMode.ThrowAttribute);
             addValuePanel.gameObject.SetActive(
@@ -229,6 +232,12 @@ namespace DnD.UI
                     SetInputValue(readOnlyValueInput, intValue);
                     SetInputValue(addValueInput, 0);
                     SetInputValue(reduceValueInput, 0);
+
+                    if(intIncValue != null)
+                    {
+                        SetInputValue(modifierValueInput, intIncValue.Value);
+                    }
+
                     break;
                 case EUpdatePropMode.ThrowAttribute:
                     SetInputValue(readOnlyValueInput, throwAttribute.baseValue);
@@ -334,7 +343,7 @@ namespace DnD.UI
                     callback.Invoke();
                     break;
                 case EUpdatePropMode.IntValue:
-                    intCallback?.Invoke(intValue + value);
+                    intCallback?.Invoke(intValue + value, intIncValue != null ? GetInputValue(modifierValueInput) : null);
                     break;
             }
 
@@ -352,11 +361,11 @@ namespace DnD.UI
             switch (propMode)
             {
                 case EUpdatePropMode.CurrentStat:
-                    statValue.current = Mathf.Max(statValue.current - value, 0);
+                    statValue.current = statValue.current - value;
                     callback.Invoke();
                     break;
                 case EUpdatePropMode.IntValue:
-                    intCallback?.Invoke(Mathf.Max(intValue - value, 0));
+                    intCallback?.Invoke(Mathf.Max(intValue - value, 0), intIncValue != null ? GetInputValue(modifierValueInput) : null);
                     break;
             }
 
@@ -448,7 +457,7 @@ namespace DnD.UI
                     callback.Invoke();
                     break;
                 case EUpdatePropMode.IntValue:
-                    intCallback?.Invoke(GetCurrentValue());
+                    intCallback?.Invoke(GetCurrentValue(), intIncValue != null ? GetInputValue(modifierValueInput) : null);
                     break;
                 case EUpdatePropMode.ThrowAttribute:
                     throwAttribute.baseValue = GetInputValue(readOnlyValueInput);

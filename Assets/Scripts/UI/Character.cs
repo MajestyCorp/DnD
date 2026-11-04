@@ -60,6 +60,8 @@ namespace DnD.UI
         private Skills skills;
         [SerializeField, Header("Inventory")]
         private DnD.UI.Inventory.Inventory inventory;
+        [SerializeField, Header("Tabs")]
+        private DnD.UI.Tabs.CharacterTabGroup characterTabGroup;
 
         private CharacterData _character = null;
         private int _currentPropIndex;
@@ -67,12 +69,24 @@ namespace DnD.UI
 
         private void Awake()
         {
+            ResetSkills.OnReset += OnReset;
             throws.character = this;
 
             CharacterManager.Instance.OnSetActiveCharacter += OnSetActiveCharacter;
             Invalidate(CharacterManager.Instance.ActiveCharacter);
 
             SetEditMode(false);
+        }
+
+        private void OnReset()
+        {
+            _character.hitPoints.current = _character.hitPoints.max;
+            labelHealth.text = _character.hitPoints.ToString();
+        }
+
+        private void OnDestroy()
+        {
+            ResetSkills.OnReset -= OnReset;
         }
 
         private void OnSetActiveCharacter(CharacterData data)
@@ -103,8 +117,8 @@ namespace DnD.UI
             labelCharisma.text = data.charisma.ToString();
 
             labelHealth.text = data.hitPoints.ToString();
-            labelInitiative.text = data.initiative.ToString();
-            labelArmor.text = data.armorClass.ToString();
+            labelInitiative.text = data.GetInitiativeInfo();
+            labelArmor.text = data.GetArmorClassInfo();
             labelLevel.text = data.level.ToString();
             labelExperience.text = data.experience.ToString();
             labelMasteryBonus.text = data.masteryBonus.ToString();
@@ -152,6 +166,7 @@ namespace DnD.UI
             throws.SetEditable(value);
             skills.SetEditable(value);
             inventory.SetEditable(value);
+            characterTabGroup.SetEditable(value);
 
             if (!value && _character != null)
                 _character.Save();
@@ -209,10 +224,10 @@ namespace DnD.UI
             switch (index)
             {
                 case 0:
-                    UpdatePropPopup.Popup("Инициативу", _character.initiative, false, SaveValue);
+                    UpdatePropPopup.Popup("Инициативу", _character.initiative, false, SaveValue, _character.initiativeInc);
                     break;
                 case 1:
-                    UpdatePropPopup.Popup("Класс Брони", _character.armorClass, false, SaveValue);
+                    UpdatePropPopup.Popup("Класс Брони", _character.armorClass, false, SaveValue, _character.armorClassInc);
                     break;
                 case 2:
                     UpdatePropPopup.Popup("Уровень", _character.level, false, SaveValue);
@@ -226,15 +241,17 @@ namespace DnD.UI
             }
         }
 
-        private void SaveValue(int value)
+        private void SaveValue(int value, int? inc)
         {
             switch (_currentPropIndex)
             {
                 case 0:
                     _character.initiative = value;
+                    _character.initiativeInc = inc.Value;
                     break;
                 case 1:
                     _character.armorClass = value;
+                    _character.armorClassInc = inc.Value;
                     break;
                 case 2:
                     _character.level = value;

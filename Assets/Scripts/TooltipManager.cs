@@ -10,9 +10,9 @@ namespace DnD
         public static TooltipManager Instance { get; private set; }
 
         [SerializeField]
-        private RectTransform itemTransformTooltip;
-        [SerializeField]
         private ItemTooltip itemTooltip;
+        [SerializeField]
+        private TextTooltip textTooltip;
         [SerializeField]
         private Canvas canvas;
 
@@ -43,6 +43,11 @@ namespace DnD
         public void ShowFor(RectTransform target, Item item, bool isTemplate = false)
         {
             itemTooltip.Initialize(target, item, isTemplate);
+        }
+
+        public void ShowFor(RectTransform target, string text)
+        {
+            textTooltip.Initialize(target, text);
         }
     }
 }

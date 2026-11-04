@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b4937079e6eb35647bdcbb3c835569a7, type: 3}
-  m_Name: Variant1
+  m_Name: ItemIcons
   m_EditorClassIdentifier: Assembly-CSharp::DnD.Profiles.ItemIconsProfile
   groups:
   - Name: "\u041E\u0440\u0443\u0436\u0438\u0435 \u0438 \u0429\u0438\u0442\u044B"
@@ -34,6 +34,14 @@ MonoBehaviour:
     - {fileID: -2493524080321100878, guid: fa8b42e044f5a53408856f11d7919f8d, type: 3}
     - {fileID: -4310069398261351220, guid: fa8b42e044f5a53408856f11d7919f8d, type: 3}
     - {fileID: -7437535810581989850, guid: fa8b42e044f5a53408856f11d7919f8d, type: 3}
+    - {fileID: -1618414788352727060, guid: fa8b42e044f5a53408856f11d7919f8d, type: 3}
+    - {fileID: 1195749791317709397, guid: fa8b42e044f5a53408856f11d7919f8d, type: 3}
+    - {fileID: 3891191743473813038, guid: fa8b42e044f5a53408856f11d7919f8d, type: 3}
+    - {fileID: -115524692, guid: 63d69e171758ca143b13b3468b044e75, type: 3}
+    - {fileID: -630426339, guid: 63d69e171758ca143b13b3468b044e75, type: 3}
+    - {fileID: -1655278667, guid: 63d69e171758ca143b13b3468b044e75, type: 3}
+    - {fileID: 1734003038, guid: 63d69e171758ca143b13b3468b044e75, type: 3}
+    - {fileID: 62213897, guid: 63d69e171758ca143b13b3468b044e75, type: 3}
   - Name: "\u041F\u043E\u0441\u043E\u0445\u0438 \u0438 \u0416\u0435\u0437\u043B\u044B"
     icons:
     - {fileID: -8561421167357734810, guid: d1a0369861af2ba4895ffadfd3cec7d5, type: 3}
