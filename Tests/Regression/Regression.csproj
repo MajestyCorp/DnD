@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <NoWarn>0649;0169;0414</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <JsonDll Include="../../Library/PackageCache/com.unity.nuget.newtonsoft-json*/Runtime/Newtonsoft.Json.dll" />
+    <Reference Include="Newtonsoft.Json"><HintPath>@(JsonDll)</HintPath></Reference>
+    <Compile Include="../../Assets/Scripts/Model/*.cs" Link="Source/Model/%(Filename)%(Extension)" />
+    <Compile Include="../../Assets/Scripts/Converters/*.cs" Link="Source/Converters/%(Filename)%(Extension)" />
+    <Compile Include="../../Assets/Scripts/JsonStorage.cs" Link="Source/JsonStorage.cs" />
+    <Compile Include="../../Assets/Scripts/CharacterManager.cs" Link="Source/CharacterManager.cs" />
+    <Compile Include="../../Assets/Scripts/ItemsLibrary.cs" Link="Source/ItemsLibrary.cs" />
+    <Compile Include="../../Assets/Scripts/IInitializer.cs" Link="Source/IInitializer.cs" />
+    <Compile Include="../../Assets/Scripts/UI/IEditable.cs" Link="Source/IEditable.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Inventory/Inventory.cs" Link="Source/Inventory.cs" />
+    <Compile Include="../../Assets/Scripts/UI/ManageItemPopup.cs" Link="Source/ManageItemPopup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/ImportPopup.cs" Link="Source/ImportPopup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/ExportPopup.cs" Link="Source/ExportPopup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/SkillItem.cs" Link="Source/SkillItem.cs" />
+    <Compile Include="../../Assets/Scripts/UI/TabGroup.cs" Link="Source/TabGroup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Tabs/CharacterTabGroup.cs" Link="Source/CharacterTabGroup.cs" />
+  </ItemGroup>
+</Project>
