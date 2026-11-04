@@ -45,7 +45,7 @@ namespace DnD.UI
         {
             if (isSelected)
             {
-                // если вкладка выбрана — игнорируем hover/pressed
+                // РµСЃР»Рё РІРєР»Р°РґРєР° РІС‹Р±СЂР°РЅР° вЂ” РёРіРЅРѕСЂРёСЂСѓРµРј hover/pressed
                 base.DoStateTransition(SelectionState.Selected, instant);
                 return;
             }

@@ -185,22 +185,22 @@ namespace DnD.UI
             switch (index)
             {
                 case 0:
-                    UpdatePropPopup.Popup("Силу", _character.strength, SaveCharacter);
+                    UpdatePropPopup.Popup("РЎРёР»Сѓ", _character.strength, SaveCharacter);
                     break;
                 case 1:
-                    UpdatePropPopup.Popup("Ловкость", _character.dexterity, SaveCharacter);
+                    UpdatePropPopup.Popup("Р›РѕРІРєРѕСЃС‚СЊ", _character.dexterity, SaveCharacter);
                     break;
                 case 2:
-                    UpdatePropPopup.Popup("Телосложение", _character.constitution, SaveCharacter);
+                    UpdatePropPopup.Popup("РўРµР»РѕСЃР»РѕР¶РµРЅРёРµ", _character.constitution, SaveCharacter);
                     break;
                 case 3:
-                    UpdatePropPopup.Popup("Интеллект", _character.intelligence, SaveCharacter);
+                    UpdatePropPopup.Popup("РРЅС‚РµР»Р»РµРєС‚", _character.intelligence, SaveCharacter);
                     break;
                 case 4:
-                    UpdatePropPopup.Popup("Мудрость", _character.wisdom, SaveCharacter);
+                    UpdatePropPopup.Popup("РњСѓРґСЂРѕСЃС‚СЊ", _character.wisdom, SaveCharacter);
                     break;
                 case 5:
-                    UpdatePropPopup.Popup("Харизму", _character.charisma, SaveCharacter);
+                    UpdatePropPopup.Popup("РҐР°СЂРёР·РјСѓ", _character.charisma, SaveCharacter);
                     break;
             }
         }
@@ -214,34 +214,35 @@ namespace DnD.UI
             {
                 case 0:
                     if (editMode == EEditMode.Edit)
-                        UpdatePropPopup.Popup("Хит Поинты", _character.hitPoints, EUpdatePropMode.MaxStat, SaveCharacter);
+                        UpdatePropPopup.Popup("РҐРёС‚ РџРѕРёРЅС‚С‹", _character.hitPoints, EUpdatePropMode.MaxStat, SaveCharacter);
                     else
-                        UpdatePropPopup.Popup("Хит Поинты", _character.hitPoints, EUpdatePropMode.CurrentStat, SaveCharacter);
+                        UpdatePropPopup.Popup("РҐРёС‚ РџРѕРёРЅС‚С‹", _character.hitPoints, EUpdatePropMode.CurrentStat, SaveCharacter);
                     break;
             }
         }
 
         public void ButtonEditValue(int index)
         {
+            // Level is derived from XP; tapping it edits the XP total instead.
+            if (index == 2)
+                index = 3;
+
             SoundManager.Instance.PlayClick();
             _currentPropIndex = index;
 
             switch (index)
             {
                 case 0:
-                    UpdatePropPopup.Popup("Инициативу", _character.initiative, false, SaveValue, _character.initiativeInc);
+                    UpdatePropPopup.Popup("РРЅРёС†РёР°С‚РёРІСѓ", _character.initiative, false, SaveValue, _character.initiativeInc);
                     break;
                 case 1:
-                    UpdatePropPopup.Popup("Класс Брони", _character.armorClass, false, SaveValue, _character.armorClassInc);
-                    break;
-                case 2:
-                    UpdatePropPopup.Popup("Уровень", _character.level, false, SaveValue);
+                    UpdatePropPopup.Popup("РљР»Р°СЃСЃ Р‘СЂРѕРЅРё", _character.armorClass, false, SaveValue, _character.armorClassInc);
                     break;
                 case 3:
-                    UpdatePropPopup.Popup("Опыт", _character.experience, editMode == EEditMode.Show, SaveValue);
+                    UpdatePropPopup.Popup("РћРїС‹С‚", _character.experience, editMode == EEditMode.Show, SaveValue);
                     break;
                 case 4:
-                    UpdatePropPopup.Popup("Бонус мастерства", _character.masteryBonus, false, SaveValue);
+                    UpdatePropPopup.Popup("Р‘РѕРЅСѓСЃ РјР°СЃС‚РµСЂСЃС‚РІР°", _character.masteryBonus, false, SaveValue);
                     break;
             }
         }
@@ -257,9 +258,6 @@ namespace DnD.UI
                 case 1:
                     _character.armorClass = value;
                     _character.armorClassInc = inc.Value;
-                    break;
-                case 2:
-                    _character.level = value;
                     break;
                 case 3:
                     _character.experience = value;

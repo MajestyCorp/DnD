@@ -22,6 +22,40 @@ static class Program
         Directory.CreateDirectory(TestRoot);
         try
         {
+            Test("XP thresholds match all twenty D&D 5e levels", () =>
+            {
+                var thresholds = new[]
+                {
+                    0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+                    85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000
+                };
+                for (var index = 0; index < thresholds.Length; index++)
+                {
+                    Equal(index + 1, CharacterData.GetLevelForExperience(thresholds[index]));
+                    if (index > 0)
+                        Equal(index, CharacterData.GetLevelForExperience(thresholds[index] - 1));
+                }
+                Equal(1, CharacterData.GetLevelForExperience(int.MinValue));
+                Equal(20, CharacterData.GetLevelForExperience(int.MaxValue));
+            });
+            Test("Changing XP updates level in both directions and clamps negative XP", () =>
+            {
+                var hero = new CharacterData { experience = 6500 };
+                hero.Recalculate(); Equal(5, hero.level);
+                hero.experience = 300; hero.Recalculate(); Equal(2, hero.level);
+                hero.experience = -10; hero.Recalculate(); Equal(1, hero.level); Equal(0, hero.experience);
+                hero.experience = int.MaxValue; hero.Recalculate(); Equal(20, hero.level);
+            });
+            Test("Saved and imported levels are recalculated from XP", () =>
+            {
+                SetSaveFolder("level-from-xp");
+                var hero = new CharacterData { level = 20, experience = 900 };
+                Check(hero.Save()); Equal(3, hero.level); Equal(3, CharacterData.Load(hero.id).level);
+                var oldJson = JObject.Parse(JsonStorage.Serialize(hero));
+                oldJson.Remove("dataVersion"); oldJson["level"] = 18; oldJson["experience"] = 14000;
+                var imported = JsonStorage.Deserialize<CharacterData>(oldJson.ToString());
+                Equal(6, imported.level); Equal(14000, imported.experience);
+            });
             Test("Self-sync preserves effects and props", () =>
             {
                 var item = MakeItem();

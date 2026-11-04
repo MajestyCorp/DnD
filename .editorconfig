@@ -1,0 +1,3 @@
+# C# source files use UTF-8, including Russian UI strings.
+[*.cs]
+charset = utf-8

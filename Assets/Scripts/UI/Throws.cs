@@ -66,22 +66,22 @@ namespace DnD.UI
             switch(index)
             {
                 case 0:
-                    UpdatePropPopup.Popup("Силу", _data.throws.strength, _data.masteryBonus, SaveCharacter);
+                    UpdatePropPopup.Popup("РЎРёР»Сѓ", _data.throws.strength, _data.masteryBonus, SaveCharacter);
                     break;
                 case 1:
-                    UpdatePropPopup.Popup("Ловкость", _data.throws.dexterity, _data.masteryBonus, SaveCharacter);
+                    UpdatePropPopup.Popup("Р›РѕРІРєРѕСЃС‚СЊ", _data.throws.dexterity, _data.masteryBonus, SaveCharacter);
                     break;
                 case 2:
-                    UpdatePropPopup.Popup("Телосложение", _data.throws.constitution, _data.masteryBonus, SaveCharacter);
+                    UpdatePropPopup.Popup("РўРµР»РѕСЃР»РѕР¶РµРЅРёРµ", _data.throws.constitution, _data.masteryBonus, SaveCharacter);
                     break;
                 case 3:
-                    UpdatePropPopup.Popup("Интеллект", _data.throws.intelligence, _data.masteryBonus, SaveCharacter);
+                    UpdatePropPopup.Popup("РРЅС‚РµР»Р»РµРєС‚", _data.throws.intelligence, _data.masteryBonus, SaveCharacter);
                     break;
                 case 4:
-                    UpdatePropPopup.Popup("Мудрость", _data.throws.wisdom, _data.masteryBonus, SaveCharacter);
+                    UpdatePropPopup.Popup("РњСѓРґСЂРѕСЃС‚СЊ", _data.throws.wisdom, _data.masteryBonus, SaveCharacter);
                     break;
                 case 5:
-                    UpdatePropPopup.Popup("Харизму", _data.throws.charisma, _data.masteryBonus, SaveCharacter);
+                    UpdatePropPopup.Popup("РҐР°СЂРёР·РјСѓ", _data.throws.charisma, _data.masteryBonus, SaveCharacter);
                     break;
             }
         }

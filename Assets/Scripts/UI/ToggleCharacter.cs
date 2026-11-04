@@ -36,7 +36,7 @@ namespace DnD.UI
         public void ButtonDelete()
         {
             SoundManager.Instance.PlayClick();
-            ConfirmPopup.Popup("Вы действительно хотите удалить персонажа <b>" + Character.name + "</b>?", ConfirmDelete);
+            ConfirmPopup.Popup("Р’С‹ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ РїРµСЂСЃРѕРЅР°Р¶Р° <b>" + Character.name + "</b>?", ConfirmDelete);
         }
 
         private void ConfirmDelete()

@@ -13,6 +13,13 @@ namespace DnD.Model
     {
         private static string FolderPath => Path.Combine(Application.persistentDataPath, "characters");
 
+        // D&D 5e (2014), Character Advancement: cumulative XP for levels 1 through 20.
+        private static readonly int[] levelExperienceThresholds =
+        {
+            0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+            85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000
+        };
+
         public int dataVersion = 1;
 
         public bool isSelected = false;
@@ -148,8 +155,19 @@ namespace DnD.Model
             Recalculate();
         }
 
+        public static int GetLevelForExperience(int experience)
+        {
+            for (var index = levelExperienceThresholds.Length - 1; index > 0; index--)
+                if (experience >= levelExperienceThresholds[index])
+                    return index + 1;
+            return 1;
+        }
+
         public void Recalculate()
         {
+            experience = Mathf.Max(0, experience);
+            level = GetLevelForExperience(experience);
+
             foreach (var attribute in new[] { strength, dexterity, constitution, intelligence, wisdom, charisma })
                 if (attribute.auto)
                     attribute.CalculateModifier();
