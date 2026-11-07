@@ -13,6 +13,9 @@ namespace DnD.UI.Spells
         [SerializeField] private TMP_InputField searchInput;
         [SerializeField] private TMP_Dropdown classFilter;
         [SerializeField] private TMP_Dropdown levelFilter;
+        [SerializeField] private TMP_Dropdown subclassFilter;
+        [SerializeField] private GameObject subclassFilterPanel;
+        private readonly CharacterSubclassDropdown subclassChoice = new();
         [SerializeField] private CharacterOptionsProfile optionsProfile;
         [SerializeField] private SpellListView listView;
         [SerializeField] private GameObject emptyMessage;
@@ -32,6 +35,7 @@ namespace DnD.UI.Spells
             searchInput.onValueChanged.AddListener(OnSearchChanged);
             classFilter.onValueChanged.AddListener(OnClassChanged);
             if (levelFilter != null) levelFilter.onValueChanged.AddListener(OnLevelChanged);
+            if (subclassFilter != null) subclassFilter.onValueChanged.AddListener(OnLevelChanged);
             CharacterManager.Instance.OnSetActiveCharacter += OnCharacterChanged;
         }
 
@@ -41,6 +45,7 @@ namespace DnD.UI.Spells
             searchInput.onValueChanged.RemoveListener(OnSearchChanged);
             classFilter.onValueChanged.RemoveListener(OnClassChanged);
             if (levelFilter != null) levelFilter.onValueChanged.RemoveListener(OnLevelChanged);
+            if (subclassFilter != null) subclassFilter.onValueChanged.RemoveListener(OnLevelChanged);
             if (CharacterManager.Instance != null)
                 CharacterManager.Instance.OnSetActiveCharacter -= OnCharacterChanged;
         }
@@ -95,6 +100,7 @@ namespace DnD.UI.Spells
 
             searchInput.SetTextWithoutNotify("");
             classFilter.SetValueWithoutNotify(Mathf.Max(0, classIds.IndexOf(character.characterClassId)));
+            RefreshSubclassFilter(character.characterSubclassId);
             if (levelFilter != null) levelFilter.SetValueWithoutNotify(0);
             searchPending = false;
             Show();
@@ -122,8 +128,15 @@ namespace DnD.UI.Spells
 
         private void OnClassChanged(int index) 
         { 
+            RefreshSubclassFilter();
             searchPending = false; 
             Refresh(); 
+        }
+
+        private void RefreshSubclassFilter(string selectedId = null)
+        {
+            var classId = classIds.Count == 0 ? null : classIds[Mathf.Clamp(classFilter.value, 0, classIds.Count - 1)];
+            subclassChoice.Initialize(subclassFilter, subclassFilterPanel, classId, selectedId, "Без подкласса");
         }
 
         private void OnLevelChanged(int index)
@@ -158,7 +171,7 @@ namespace DnD.UI.Spells
                 return;
 
             var classId = classIds[Mathf.Clamp(classFilter.value, 0, classIds.Count - 1)];
-            var found = SpellLibrary.Catalog.Search(classId, searchInput.text, SpellLibrary.Language);
+            var found = SpellLibrary.Catalog.Search(classId, searchInput.text, SpellLibrary.Language, subclassChoice.SelectedId);
             // Dropdown index 0 means all levels; indices 1..10 map to spell levels 0..9.
             var selectedLevel = levelFilter != null ? levelFilter.value - 1 : -1;
             if (selectedLevel >= 0)

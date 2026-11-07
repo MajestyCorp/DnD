@@ -29,6 +29,7 @@ namespace DnD.Model
         public string characterClass;  // Display name; characterClassId identifies the catalog entry.
         public string raceId;
         public string characterClassId;
+        public string characterSubclassId;
         public string alignment;       // Мировоззрение
         public bool isMale;
         public int avatarIndex;

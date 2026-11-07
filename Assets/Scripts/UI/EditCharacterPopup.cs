@@ -23,6 +23,26 @@ namespace DnD.UI
         private TMP_Dropdown raceDropdown;
         [SerializeField]
         private TMP_Dropdown classDropdown;
+        [SerializeField] private TMP_Dropdown subclassDropdown;
+        [SerializeField] private GameObject subclassPanel;
+        private readonly CharacterSubclassDropdown subclassChoice = new();
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (classDropdown != null) classDropdown.onValueChanged.AddListener(OnClassChanged);
+        }
+
+        protected override void OnDestroy()
+        {
+            if (classDropdown != null) classDropdown.onValueChanged.RemoveListener(OnClassChanged);
+            base.OnDestroy();
+        }
+
+        private void OnClassChanged(int index)
+        {
+            subclassChoice.Initialize(subclassDropdown, subclassPanel, classChoice.Selection?.id);
+        }
 
         private readonly CharacterOptionDropdown raceChoice = new();
         private readonly CharacterOptionDropdown classChoice = new();
@@ -47,6 +67,7 @@ namespace DnD.UI
             inputName.text = data.name;
             raceChoice.Initialize(raceDropdown, optionsProfile != null ? optionsProfile.Races : null, data.raceId);
             classChoice.Initialize(classDropdown, optionsProfile != null ? optionsProfile.Classes : null, data.characterClassId);
+            subclassChoice.Initialize(subclassDropdown, subclassPanel, classChoice.Selection?.id, data.characterSubclassId);
             Show();
         }
 
@@ -63,6 +84,8 @@ namespace DnD.UI
             character.name = inputName.text;
             character.raceId = race.id;
             character.race = race.displayName;
+            character.characterSubclassId = subclassDropdown != null ? subclassChoice.SelectedId
+                : character.characterClassId == characterClass.id ? character.characterSubclassId : null;
             character.characterClassId = characterClass.id;
             character.characterClass = characterClass.displayName;
             character.isMale = toggleMale.isOn;

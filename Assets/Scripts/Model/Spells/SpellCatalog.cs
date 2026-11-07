@@ -39,10 +39,26 @@ namespace DnD.Model.Spells
 
         public SpellDefinition Find(string id) => id != null && byId.TryGetValue(id, out var spell) ? spell : null;
 
-        public List<SpellDefinition> Search(string classId, string text, string language = "ru")
+        public List<SpellSubclassList> GetSubclasses(string classId, string language = "ru")
+        {
+            return Data.subclassLists.Where(item => item.classId == classId
+                && !string.IsNullOrWhiteSpace(item.id) && item.names != null
+                && item.GetName(language).Any(char.IsLetter)).ToList();
+        }
+
+        public SpellSubclassList FindSubclass(string classId, string subclassId)
+        {
+            return string.IsNullOrEmpty(classId) || string.IsNullOrEmpty(subclassId) ? null
+                : Data.subclassLists.FirstOrDefault(item => item.classId == classId && item.id == subclassId);
+        }
+
+        public List<SpellDefinition> Search(string classId, string text, string language = "ru", string subclassId = null)
         {
             var terms = Normalize(text).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            return byId.Values.Where(spell => (string.IsNullOrEmpty(classId) || spell.classIds.Contains(classId))
+            var subclass = FindSubclass(classId, subclassId);
+            var extraIds = subclass != null ? new HashSet<string>(subclass.spellIds, StringComparer.Ordinal) : null;
+            return byId.Values.Where(spell => (string.IsNullOrEmpty(classId) || spell.classIds.Contains(classId)
+                    || (extraIds != null && extraIds.Contains(spell.id)))
                     && terms.All(term => searchText[spell.id].Contains(term)))
                 .OrderBy(spell => spell.level)
                 .ThenBy(spell => spell.GetText(language).name, StringComparer.OrdinalIgnoreCase).ToList();

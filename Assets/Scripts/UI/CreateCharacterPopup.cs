@@ -22,6 +22,26 @@ namespace DnD.UI
         private TMP_Dropdown raceDropdown;
         [SerializeField]
         private TMP_Dropdown classDropdown;
+        [SerializeField] private TMP_Dropdown subclassDropdown;
+        [SerializeField] private GameObject subclassPanel;
+        private readonly CharacterSubclassDropdown subclassChoice = new();
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (classDropdown != null) classDropdown.onValueChanged.AddListener(OnClassChanged);
+        }
+
+        protected override void OnDestroy()
+        {
+            if (classDropdown != null) classDropdown.onValueChanged.RemoveListener(OnClassChanged);
+            base.OnDestroy();
+        }
+
+        private void OnClassChanged(int index)
+        {
+            subclassChoice.Initialize(subclassDropdown, subclassPanel, classChoice.Selection?.id);
+        }
 
         private readonly CharacterOptionDropdown raceChoice = new();
         private readonly CharacterOptionDropdown classChoice = new();
@@ -37,6 +57,7 @@ namespace DnD.UI
             inputName.text = "";
             raceChoice.Initialize(raceDropdown, optionsProfile != null ? optionsProfile.Races : null);
             classChoice.Initialize(classDropdown, optionsProfile != null ? optionsProfile.Classes : null);
+            OnClassChanged(0);
             avatar.Invalidate(null);
             avatar.SetEditMode(true);
         }
@@ -53,7 +74,8 @@ namespace DnD.UI
             var race = raceChoice.Selection;
             var characterClass = classChoice.Selection;
             var hero = CharacterManager.Instance.CreateCharacter(inputName.text, race.displayName,
-                characterClass.displayName, toggleMale.isOn, avatar.CurrentIndex, race.id, characterClass.id);
+                characterClass.displayName, toggleMale.isOn, avatar.CurrentIndex, race.id, characterClass.id,
+                subclassChoice.SelectedId);
             if (hero == null)
                 return;
             CharacterManager.Instance.SetActiveCharacter(hero);

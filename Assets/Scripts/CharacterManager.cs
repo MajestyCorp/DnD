@@ -57,7 +57,7 @@ namespace DnD
         }
 
         public CharacterData CreateCharacter(string name, string race, string charClass, bool isMale, int avatarIndex,
-            string raceId = null, string characterClassId = null)
+            string raceId = null, string characterClassId = null, string characterSubclassId = null)
         {
             var newChar = new CharacterData
             {
@@ -66,6 +66,7 @@ namespace DnD
                 characterClass = charClass,
                 raceId = raceId,
                 characterClassId = characterClassId,
+                characterSubclassId = SpellLibrary.Catalog?.FindSubclass(characterClassId, characterSubclassId)?.id,
                 level = 1,
                 experience = 0,
                 armorClass = 10,

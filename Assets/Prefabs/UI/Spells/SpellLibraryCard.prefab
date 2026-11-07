@@ -889,7 +889,7 @@ MonoBehaviour:
   previewLength: 110
   cardDecorations:
   - {fileID: 710127501230787}
-  tooltipInfo: {fileID: 0}
+  tooltipInfo: {fileID: 2417384653727743327}
   starredToggle: {fileID: 5748372875814821909}
   selectedHighlight: {fileID: 0}
 --- !u!114 &2570786475597820753
