@@ -62,6 +62,8 @@ namespace DnD.UI
         private DnD.UI.Inventory.Inventory inventory;
         [SerializeField, Header("Tabs")]
         private DnD.UI.Tabs.CharacterTabGroup characterTabGroup;
+        [SerializeField]
+        private DnD.UI.Spells.CharacterSpellsTab characterSpellsTab;
 
         private CharacterData _character = null;
         private int _currentPropIndex;
@@ -172,6 +174,9 @@ namespace DnD.UI
             skills.SetEditable(value);
             inventory.SetEditable(value);
             characterTabGroup.SetEditable(value);
+            if (characterSpellsTab == null)
+                characterSpellsTab = UnityEngine.Object.FindFirstObjectByType<DnD.UI.Spells.CharacterSpellsTab>(FindObjectsInactive.Include);
+            if (characterSpellsTab != null) characterSpellsTab.SetEditable(value);
 
             if (!value && _character != null)
                 _character.Save();

@@ -1,6 +1,7 @@
 using DnD.Model;
 using DnD.Model.Inventory;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,8 +9,6 @@ namespace DnD.UI.Tabs
 {
     public class CharacterTabGroup : TabGroup
     {
-        public const int TAB_INDEX = 3;
-
         [SerializeField, Header("Tab Button")]
         private Transform content;
         [SerializeField]
@@ -74,10 +73,12 @@ namespace DnD.UI.Tabs
                 tabContents.Add(content);
             }
 
-            for (var i = 0; i < data.tabs.Count; i++)
+            var orderedTabs = data.tabs.OrderBy(tab => tab.index).ToList();
+            for (var i = 0; i < orderedTabs.Count; i++)
             {
-                var tab = data.tabs[i];
-                var button = tabButtons[i];
+                var tab = orderedTabs[i];
+                var button = tabButtons[data.tabs.IndexOf(tab)];
+                tab.index = StaticTabCount + i;
                 button.transform.SetSiblingIndex(tab.index);
             }
 
@@ -95,6 +96,7 @@ namespace DnD.UI.Tabs
             for (var i = 0; i < tabButtons.Count; i++)
             {
                 tabButtons[i].gameObject.SetActive(false);
+                tabButtons[i].transform.SetParent(null);
                 Destroy(tabButtons[i].gameObject);
             }
             tabButtons.Clear();
@@ -221,10 +223,10 @@ namespace DnD.UI.Tabs
                 var item = list[i];
                 var oldIndex = oldList.IndexOf(item);
 
-                item.index = i + TAB_INDEX;
+                item.index = i + StaticTabCount;
 
                 var button = tabButtons[oldIndex];
-                button.transform.SetSiblingIndex(i + TAB_INDEX);
+                button.transform.SetSiblingIndex(i + StaticTabCount);
             }
 
             var selectLastTab = false;

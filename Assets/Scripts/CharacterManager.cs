@@ -39,6 +39,9 @@ namespace DnD
 
         public void InitializeAfter()
         {
+            // Warm up the catalog before any character tab is opened.
+            _ = SpellLibrary.Catalog;
+
             for (var i=0;i<_models.Count; i++)
             {
                 var model = _models[i];

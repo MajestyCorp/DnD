@@ -64,6 +64,7 @@ namespace DnD.Model
 
         public List<Item> items = new();
         public List<TabData> tabs = new();
+        public List<string> spellIds = new();
 
         public CharacterData()
         {
@@ -128,6 +129,9 @@ namespace DnD.Model
             skills.Normalize();
             items ??= new List<Item>();
             tabs ??= new List<TabData>();
+            spellIds ??= new List<string>();
+            var uniqueSpells = new HashSet<string>(StringComparer.Ordinal);
+            spellIds.RemoveAll(id => string.IsNullOrWhiteSpace(id) || !uniqueSpells.Add(id));
             foreach (var item in items)
                 item?.Normalize();
             foreach (var tab in tabs)

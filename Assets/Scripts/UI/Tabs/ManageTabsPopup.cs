@@ -1,5 +1,6 @@
 using DnD.Model;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -94,11 +95,9 @@ namespace DnD.UI.Tabs
                 list.Add(item);
             }
 
-            for (var i = 0; i < list.Count; i++)
-            {
-                var item = list[i];
-                item.transform.SetSiblingIndex(item.Data.index - CharacterTabGroup.TAB_INDEX);
-            }
+            var ordered = list.OrderBy(item => item.Data.index).ToList();
+            for (var i = 0; i < ordered.Count; i++)
+                ordered[i].transform.SetSiblingIndex(i);
         }
     }
 }

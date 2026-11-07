@@ -24,6 +24,9 @@ namespace DnD.UI.Tabs
 
         public int OriginalIndex => originalIndex;
 
+        protected void NotifyDragStarted() { DragStarted?.Invoke(this); }
+        protected void NotifyDragEnded() { DragEnded?.Invoke(this); }
+
         public virtual bool CanPerformAction(EDropAction action)
         {
             return true;
@@ -34,7 +37,7 @@ namespace DnD.UI.Tabs
 
         }
 
-        public void OnBeginDrag(PointerEventData eventData)
+        public virtual void OnBeginDrag(PointerEventData eventData)
         {
             originalParent = transform.parent;
             originalIndex = transform.GetSiblingIndex();
@@ -70,7 +73,7 @@ namespace DnD.UI.Tabs
             placeholder.transform.SetSiblingIndex(transform.GetSiblingIndex());
         }
 
-        public void OnDrag(PointerEventData eventData)
+        public virtual void OnDrag(PointerEventData eventData)
         {
             transform.position = (Vector3)eventData.position + offset;
             var obj = eventData.pointerEnter;
@@ -89,7 +92,7 @@ namespace DnD.UI.Tabs
             }
         }
 
-        public void OnEndDrag(PointerEventData eventData)
+        public virtual void OnEndDrag(PointerEventData eventData)
         {
             var index = originalIndex;
 

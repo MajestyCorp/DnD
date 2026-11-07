@@ -1,0 +1,10 @@
+<linker>
+  <!-- Newtonsoft creates these DTOs by reflection in IL2CPP Android builds. -->
+  <assembly fullname="Assembly-CSharp">
+    <type fullname="DnD.Model.Spells.SpellText" preserve="all" />
+    <type fullname="DnD.Model.Spells.SpellDefinition" preserve="all" />
+    <type fullname="DnD.Model.Spells.SpellClass" preserve="all" />
+    <type fullname="DnD.Model.Spells.SpellSubclassList" preserve="all" />
+    <type fullname="DnD.Model.Spells.SpellCatalogData" preserve="all" />
+  </assembly>
+</linker>

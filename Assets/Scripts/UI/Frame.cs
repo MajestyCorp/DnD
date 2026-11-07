@@ -39,6 +39,11 @@ namespace DnD.UI
                 gameObject.SetActive(false);
         }
 
+        protected virtual void OnDestroy()
+        {
+            OnShow -= OnFrameShow;
+        }
+
         private void OnFrameShow(Frame frame)
         {
             if (frame != this && IsVisible && invokeShowEvents)

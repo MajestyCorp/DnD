@@ -25,6 +25,21 @@
     <Compile Include="../../Assets/Scripts/UI/CharacterOptionDropdown.cs" Link="Source/CharacterOptionDropdown.cs" />
     <Compile Include="../../Assets/Scripts/UI/CreateCharacterPopup.cs" Link="Source/CreateCharacterPopup.cs" />
     <Compile Include="../../Assets/Scripts/UI/EditCharacterPopup.cs" Link="Source/EditCharacterPopup.cs" />
+    <Compile Include="../../Assets/Scripts/Model/Spells/*.cs" Link="Source/Spells/%(Filename)%(Extension)" />
+    <Compile Include="../../Assets/Scripts/CharacterSpellSelection.cs" Link="Source/CharacterSpellSelection.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellCardDrag.cs" Link="Source/SpellCardDrag.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellTooltipText.cs" Link="Source/SpellTooltipText.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Tabs/DragButton.cs" Link="Source/DragButton.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Tabs/DropArea.cs" Link="Source/DropArea.cs" />
+    <None Include="../../Assets/Prefabs/UI/Spells/SpellLibraryCard.prefab" Link="SpellLibraryCard.prefab" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Assets/Prefabs/UI/Spells/SpellTabCard.prefab" Link="SpellTabCard.prefab" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellRowUI.cs" Link="Source/SpellRowUI.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellListEntry.cs" Link="Source/SpellListEntry.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellListView.cs" Link="Source/SpellListView.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellLibraryPopup.cs" Link="Source/SpellLibraryPopup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/SpellDetailsPopup.cs" Link="Source/SpellDetailsPopup.cs" />
+    <Compile Include="../../Assets/Scripts/UI/Spells/CharacterSpellsTab.cs" Link="Source/CharacterSpellsTab.cs" />
+    <None Include="../../Assets/Resources/Spells/spells.json" Link="spells.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../Assets/Scripts/UI/TabGroup.cs" Link="Source/TabGroup.cs" />
     <Compile Include="../../Assets/Scripts/UI/Tabs/CharacterTabGroup.cs" Link="Source/CharacterTabGroup.cs" />
   </ItemGroup>

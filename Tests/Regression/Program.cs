@@ -7,6 +7,8 @@ using DnD;
 using DnD.Model;
 using DnD.Model.Inventory;
 using DnD.Profiles;
+using DnD.Model.Spells;
+using DnD.UI.Spells;
 using DnD.UI;
 using DnD.UI.Tabs;
 using Newtonsoft.Json;
@@ -23,6 +25,228 @@ static class Program
         Directory.CreateDirectory(TestRoot);
         try
         {
+            var realCatalog = new SpellCatalog(JsonStorage.Deserialize<SpellCatalogData>(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "spells.json"))));
+            SpellLibrary.Catalog = realCatalog;
+            Test("Saved spell order is preserved across different spell levels and reloading", () =>
+            {
+                SetSaveFolder("spell-order"); var hero = new CharacterData { spellIds = new() { "spell.wish", "spell.fireball", "missing-id" } };
+                Check(hero.Save()); Check(CharacterSpellSelection.Move(hero, "spell.fireball", 0));
+                Equal("spell.fireball", CharacterData.Load(hero.id).spellIds[0]);
+                Check(CharacterSpellSelection.Move(hero, "spell.fireball", 2));
+                Equal("spell.wish", SpellListEntry.ForCharacter(hero, realCatalog)[0].Id);
+                Equal("spell.fireball", SpellListEntry.ForCharacter(hero, realCatalog)[2].Id);
+                Equal(false, CharacterSpellSelection.Move(hero, "not-present", 0));
+                var blocked = new CharacterData { spellIds = new() { "spell.wish", "spell.fireball" } }; Directory.CreateDirectory(HeroPath(blocked));
+                Equal(false, CharacterSpellSelection.Move(blocked, "spell.fireball", 0)); Equal("spell.wish", blocked.spellIds[0]);
+            });
+            Test("Drag handle is edit-only and mid-drag cancellation restores the card and scroll", () =>
+            {
+                SetSaveFolder("spell-drag-cancel"); var hero = new CharacterData { spellIds = new() { "spell.fireball", "spell.cure-wounds", "spell.wish" } };
+                var setup = MakeDraggableSpells(hero, realCatalog);
+                var card = setup.rows[0]; var drag = card.GetComponent<SpellCardDrag>(); var handle = Get<GameObject>(drag, "dragHandle");
+                Equal(false, handle.activeSelf); Equal(false, drag.CanPerformAction(EDropAction.Drag));
+                setup.view.SetEditable(true, null); Check(handle.activeSelf);
+                var data = new UnityEngine.EventSystems.PointerEventData { position = new Vector2(0, 300) };
+                drag.OnBeginDrag(data); Equal(false, setup.scroll.enabled); Check(card.transform.parent != setup.parent);
+                setup.view.SetEditable(false, null); Check(card.transform.parent == setup.parent); Check(setup.scroll.enabled);
+                Equal(3, setup.parent.childCount); Equal(0, card.transform.GetSiblingIndex()); Equal(false, handle.activeSelf);
+            });
+            Test("Dragging before a later sibling saves the intended order without off-by-one", () =>
+            {
+                SetSaveFolder("spell-drag-order"); var hero = new CharacterData { spellIds = new() { "spell.fireball", "spell.cure-wounds", "spell.wish" } };
+                hero.Save(); var setup = MakeDraggableSpells(hero, realCatalog); var moved = 0;
+                setup.view.SetEditable(true, (id,index) => { moved++; CharacterSpellSelection.Move(hero,id,index); });
+                var drag = setup.rows[0].GetComponent<SpellCardDrag>();
+                var data = new UnityEngine.EventSystems.PointerEventData { position = new Vector2(0, 300) };
+                drag.OnBeginDrag(data); data.position = new Vector2(0, 80); drag.OnDrag(data); drag.OnEndDrag(data);
+                Equal(1, moved); Equal("spell.cure-wounds", hero.spellIds[0]); Equal("spell.fireball", hero.spellIds[1]); Equal("spell.wish", hero.spellIds[2]);
+                Equal("spell.fireball", CharacterData.Load(hero.id).spellIds[1]);
+            });
+            Test("DropArea excludes only the dragged character spell and trailing end-drag is harmless", () =>
+            {
+                SetSaveFolder("spell-drop-exclude"); var hero = new CharacterData { spellIds = new() { "spell.fireball", "spell.cure-wounds", "spell.wish" } }; hero.Save();
+                var removed = 0; var setup = MakeDraggableSpells(hero, realCatalog, entry => { if (CharacterSpellSelection.Remove(hero, entry.Id)) removed++; });
+                var moved = 0; setup.view.SetEditable(true, (id,index) => moved++);
+                var area = new DropArea(); area.gameObject.AddComponent<Button>(); Set(area, "action", EDropAction.Delete); Call(area, "Awake");
+                var drag = setup.rows[1].GetComponent<SpellCardDrag>(); var handle = Get<GameObject>(drag, "dragHandle");
+                var data = new UnityEngine.EventSystems.PointerEventData { position = new Vector2(0,200), pointerDrag = handle };
+                drag.OnBeginDrag(data); Check(area.GetComponent<Button>().interactable); area.OnDrop(data); drag.OnEndDrag(data);
+                Equal(1, removed); Equal(0, moved); Equal(2, hero.spellIds.Count); Check(realCatalog.Find("spell.cure-wounds") != null);
+                Equal(false, area.GetComponent<Button>().interactable); Check(setup.scroll.enabled); Call(area, "OnDestroy");
+            });
+            Test("Question tooltip contains the full description and the two prefabs have distinct controls", () =>
+            {
+                var spell = realCatalog.Find("spell.fireball"); var card = new SpellRowUI(); Set(card, "titleText", new TMPro.TMP_Text());
+                Set(card, "detailsButton", new Button()); Set(card, "useTextTooltip", true);
+                card.Bind(new SpellListEntry { Id=spell.id, Spell=spell }, null, null); card.ButtonDetails();
+                Check(TooltipManager.Instance.Text.Contains(spell.GetText("ru").description));
+                var libraryPrefab = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "SpellLibraryCard.prefab"));
+                var tabPrefab = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "SpellTabCard.prefab"));
+                Check(!libraryPrefab.Contains("SpellCardDrag")); Check(!libraryPrefab.Contains("DnD.UI.Tabs.DragButton")); Check(!libraryPrefab.Contains("m_Name: RemoveButton"));
+                Check(tabPrefab.Contains("SpellCardDrag")); Check(tabPrefab.Contains("DnD.UI.Tabs.DragButton")); Check(tabPrefab.Contains("m_Name: QuestionButton"));
+                Check(tabPrefab.Contains("actionButton: {fileID: 0}")); Check(!tabPrefab.Contains("m_Name: StarredToggle"));
+            });
+            Test("Starred draft survives every filter and applies all marked spells together", () =>
+            {
+                SetSaveFolder("starred-filters"); var manager = MakeManager();
+                var hero = manager.CreateCharacter("Mage", "Race", "Wizard", true, 0, "human", "wizard"); manager.SetActiveCharacter(hero);
+                var popup = MakeSpellPopup(); popup.Open(hero, null);
+                Call(popup, "ToggleSelection", new SpellListEntry { Id = "spell.fireball" });
+                var filters = Get<List<string>>(popup, "classIds");
+                Get<TMPro.TMP_Dropdown>(popup, "classFilter").value = filters.IndexOf("cleric");
+                Get<TMPro.TMP_InputField>(popup, "searchInput").text = "cure wounds"; Call(popup, "Refresh");
+                Call(popup, "ToggleSelection", new SpellListEntry { Id = "spell.cure-wounds" });
+                Get<TMPro.TMP_InputField>(popup, "searchInput").text = "no matching spell"; Call(popup, "Refresh");
+                Equal(0, hero.spellIds.Count); Equal(2, Get<SpellSelectionDraft>(popup, "draft").Count);
+                popup.ButtonApplySelection();
+                var loaded = CharacterData.Load(hero.id);
+                Equal(2, loaded.spellIds.Count); Check(loaded.spellIds.Contains("spell.fireball")); Check(loaded.spellIds.Contains("spell.cure-wounds"));
+            });
+            Test("Unstarring removes existing spells only on confirmation; closing cancels", () =>
+            {
+                SetSaveFolder("starred-cancel"); var manager = MakeManager();
+                var hero = manager.CreateCharacter("Mage", "Race", "Wizard", true, 0); manager.SetActiveCharacter(hero);
+                CharacterSpellSelection.Add(hero, realCatalog, "spell.fireball");
+                var popup = MakeSpellPopup(); popup.Open(hero, null);
+                Check(Get<SpellSelectionDraft>(popup, "draft").Contains("spell.fireball"));
+                Call(popup, "ToggleSelection", new SpellListEntry { Id = "spell.fireball" });
+                Equal(1, hero.spellIds.Count); popup.Hide(); Equal(1, hero.spellIds.Count);
+                popup.Open(hero, null); Check(Get<SpellSelectionDraft>(popup, "draft").Contains("spell.fireball"));
+                Call(popup, "ToggleSelection", new SpellListEntry { Id = "spell.fireball" }); popup.ButtonApplySelection();
+                Equal(0, CharacterData.Load(hero.id).spellIds.Count);
+            });
+            Test("Draft de-duplicates IDs, preserves unavailable spells and rolls back failed saves", () =>
+            {
+                SetSaveFolder("starred-failure"); var hero = new CharacterData();
+                hero.spellIds.Add("missing-id"); hero.spellIds.Add("missing-id");
+                var draft = new SpellSelectionDraft(hero, realCatalog); Equal(1, draft.Count);
+                draft.Toggle("spell.fireball"); draft.Toggle("spell.fireball"); draft.Toggle("spell.fireball"); Equal(2, draft.Count);
+                Directory.CreateDirectory(HeroPath(hero)); Equal(false, draft.Apply()); Check(draft.IsActive); Equal(2, hero.spellIds.Count);
+                Directory.Delete(HeroPath(hero)); Check(draft.Apply()); Equal(2, hero.spellIds.Count); Equal(false, draft.Apply());
+                Equal(1, hero.spellIds.Count(id => id == "spell.fireball")); Check(hero.spellIds.Contains("missing-id"));
+            });
+            Test("Details opened from library change the draft without saving the character", () =>
+            {
+                SetSaveFolder("starred-details"); var manager = MakeManager(); var hero = manager.CreateCharacter("Mage", "Race", "Class", true, 0); manager.SetActiveCharacter(hero);
+                var draft = new SpellSelectionDraft(hero, realCatalog); var popup = new SpellDetailsPopup();
+                foreach (var field in typeof(SpellDetailsPopup).GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+                    if (field.FieldType == typeof(TMPro.TMP_Text)) field.SetValue(popup, new TMPro.TMP_Text());
+                popup.Open(realCatalog.Find("spell.fireball"), hero, null, draft); popup.ButtonToggleSelection();
+                Check(draft.Contains("spell.fireball")); Equal(0, hero.spellIds.Count);
+                draft.Cancel(); popup.ButtonToggleSelection(); Equal(0, hero.spellIds.Count); Equal(false, popup.IsVisible);
+            });
+            Test("Recycled star cards reset silently and headers keep their root visible", () =>
+            {
+                var card = new SpellRowUI(); var toggle = new Toggle(); var filled = new GameObject(); var outline = new GameObject();
+                Set(card, "titleText", new TMPro.TMP_Text()); Set(card, "starredToggle", toggle); Set(card, "filledStar", filled); Set(card, "outlineStar", outline);
+                Set(card, "detailsButton", card.gameObject.AddComponent<Button>()); Call(card, "Awake");
+                var actions = 0; Action<SpellListEntry> onStar = entry => actions++;
+                card.Bind(new SpellListEntry { Id = "spell.fireball", Spell = realCatalog.Find("spell.fireball"), Selected = true, UseStarSelection = true }, null, onStar);
+                Check(toggle.isOn); Equal(0, actions); Check(filled.activeSelf); Equal(false, outline.activeSelf);
+                card.Bind(new SpellListEntry { Id = "spell.wish", Spell = realCatalog.Find("spell.wish"), UseStarSelection = true }, null, onStar);
+                Equal(false, toggle.isOn); Equal(0, actions); toggle.isOn = true; Equal(1, actions);
+                card.Bind(new SpellListEntry { Header = "Заговоры" }, null, null); Check(card.gameObject.activeSelf); Equal(false, toggle.gameObject.activeSelf);
+                Call(card, "OnDestroy");
+            });
+            Test("Real spell catalog loads with valid classes, translations and subclass links", () =>
+            {
+                Equal(483, realCatalog.Data.spells.Count); Equal(8, realCatalog.Data.classes.Count); Equal(31, realCatalog.Data.subclassLists.Count);
+                Check(realCatalog.Data.spells.All(spell => spell.classIds.Count > 0 && spell.texts.ContainsKey("ru") && spell.texts.ContainsKey("en")));
+                Check(realCatalog.Data.spells.All(spell => !spell.GetText("ru").description.Contains("<br")));
+                Equal("Fireball", realCatalog.Find("spell.fireball").GetText("unknown").name);
+                Check(realCatalog.Data.subclassLists.Any(list => list.classId == "cleric" && list.spellIds.Contains("spell.fireball")));
+                Check(!realCatalog.Find("spell.fireball").classIds.Contains("cleric"));
+            });
+            Test("Spell search combines class and bilingual text including yo/e", () =>
+            {
+                Check(realCatalog.Search("wizard", "FIREBALL").Any(spell => spell.id == "spell.fireball"));
+                Check(realCatalog.Search("wizard", "ОГНЕННЫЙ ШАР").Any(spell => spell.id == "spell.fireball"));
+                Check(realCatalog.Search("cleric", "fireball").All(spell => spell.id != "spell.fireball"));
+                Check(realCatalog.Search(null, "корона звезд").Any(spell => spell.id == "spell.crown-of-stars"));
+                Check(realCatalog.Search(null, "Пекло Аганаззара").Any(spell => spell.id == "spell.aganazzar-s-scorcher"));
+                Equal(483, realCatalog.Search(null, "").Count); Equal(0, realCatalog.Search("barbarian", "").Count);
+                Check(realCatalog.Search(null, "A line of roaring flame").Count > 0);
+            });
+            Test("Character spell selections are independent and survive save/export", () =>
+            {
+                SetSaveFolder("character-spells"); var a = new CharacterData(); var b = new CharacterData();
+                Check(CharacterSpellSelection.Add(a, realCatalog, "spell.fireball"));
+                Equal(false, CharacterSpellSelection.Add(a, realCatalog, "spell.fireball")); Equal(0, b.spellIds.Count);
+                Check(CharacterSpellSelection.Add(b, realCatalog, "spell.fireball"));
+                Check(CharacterSpellSelection.Remove(a, "spell.fireball")); Equal(1, b.spellIds.Count);
+                b.characterClassId = "cleric"; Check(b.Save()); Equal(1, CharacterData.Load(b.id).spellIds.Count);
+                b.spellIds.Add("future-or-missing-id"); b.spellIds.Add("spell.fireball"); b.spellIds.Add(null); Check(b.Save());
+                var imported = JsonStorage.Deserialize<ExportList>(JsonStorage.Serialize(new ExportList { items = new() { b } })).items.Single();
+                Equal(2, imported.spellIds.Count); Check(imported.spellIds.Contains("future-or-missing-id"));
+                var entries = SpellListEntry.ForCharacter(imported, realCatalog);
+                Check(entries.Any(entry => entry.Id == "future-or-missing-id" && entry.Spell == null && entry.Selected));
+                Check(CharacterSpellSelection.Remove(imported, "future-or-missing-id"));
+            });
+            Test("Failed spell save rolls back the selection", () =>
+            {
+                SetSaveFolder("failed-spell-save"); var hero = new CharacterData(); Directory.CreateDirectory(HeroPath(hero));
+                Equal(false, CharacterSpellSelection.Add(hero, realCatalog, "spell.fireball")); Equal(0, hero.spellIds.Count);
+                hero.spellIds.Add("spell.fireball"); Equal(false, CharacterSpellSelection.Remove(hero, "spell.fireball"));
+                Equal("spell.fireball", hero.spellIds.Single());
+            });
+            Test("Spell virtual list reuses a bounded pool and clears hidden rows", () =>
+            {
+                var view = MakeSpellList(); var entries = SpellListEntry.Group(realCatalog.Search(null, "").Select(spell => new SpellListEntry { Id = spell.id, Spell = spell }));
+                view.SetItems(entries, null, null);
+                var rows = Get<List<SpellRowUI>>(view, "pool"); Check(rows.Count < 15);
+                var scroll = Get<ScrollRect>(view, "scrollRect"); scroll.content.anchoredPosition = new Vector2(0, 5000); Call(view, "Refresh");
+                Check(Get<SpellListEntry>(rows[0], "entry") != entries[0]); Equal(entries.Count * 88f, scroll.content.sizeDelta.y);
+                view.SetItems(new List<SpellListEntry>(), null, null); Check(rows.All(row => !row.gameObject.activeSelf));
+            });
+            Test("Selected spell list uses an existing LayoutGroup without changing its toolbar", () =>
+            {
+                var parent = new RectTransform(); var toolbar = new RectTransform(); toolbar.SetParent(parent);
+                var view = new SpellListView(); Set(view, "layoutContent", parent); Set(view, "rowPrefab", new SpellRowUI());
+                var entries = SpellListEntry.Group(realCatalog.Search("wizard", "fireball").Select(spell => new SpellListEntry { Id = spell.id, Spell = spell }));
+                view.SetItems(entries, null, null);
+                var rows = Get<List<SpellRowUI>>(view, "pool"); Equal(entries.Count, rows.Count);
+                Check(rows.All(row => row.transform.parent == parent)); Equal(0, toolbar.GetSiblingIndex());
+                Check(rows.All(row => row.GetComponent<LayoutElement>().preferredHeight == 88));
+                view.SetItems(new List<SpellListEntry>(), null, null); Check(rows.All(row => !row.gameObject.activeSelf));
+                view.SetItems(entries, null, null); Equal(entries.Count, rows.Count); Equal(0, toolbar.GetSiblingIndex());
+            });
+            Test("Spell library defaults to character class and rejects stale character actions", () =>
+            {
+                SetSaveFolder("spell-popup"); var manager = MakeManager();
+                var hero = manager.CreateCharacter("Mage", "Race", "Wizard", true, 0, "human", "wizard"); manager.SetActiveCharacter(hero);
+                var popup = MakeSpellPopup(); Call(popup, "Awake"); popup.Open(hero, null);
+                var ids = Get<List<string>>(popup, "classIds"); var filter = Get<TMPro.TMP_Dropdown>(popup, "classFilter");
+                Equal("wizard", ids[filter.value]);
+                Get<TMPro.TMP_InputField>(popup, "searchInput").text = "fireball"; Call(popup, "Refresh");
+                Call(popup, "ToggleSelection", new SpellListEntry { Id = "spell.fireball", Spell = realCatalog.Find("spell.fireball") });
+                Equal(0, hero.spellIds.Count); popup.ButtonApplySelection();
+                Equal("spell.fireball", hero.spellIds.Single());
+                var other = manager.CreateCharacter("Fighter", "Race", "Fighter", true, 0, "human", "fighter"); manager.SetActiveCharacter(other);
+                Call(popup, "ToggleSelection", new SpellListEntry { Id = "spell.wish", Spell = realCatalog.Find("spell.wish") });
+                Equal(1, hero.spellIds.Count); Equal(0, other.spellIds.Count); Equal(false, popup.IsVisible);
+                popup.Open(other, null); Equal("fighter", ids[filter.value]);
+                filter.value = 0; Call(popup, "Refresh"); Check(Get<TMPro.TMP_Text>(popup, "resultsText").text.Contains("483"));
+            });
+            Test("Spell details save selection and close when the character changes", () =>
+            {
+                SetSaveFolder("spell-details"); var manager = MakeManager();
+                var hero = manager.CreateCharacter("Mage", "Race", "Wizard", true, 0); manager.SetActiveCharacter(hero);
+                var popup = new SpellDetailsPopup();
+                foreach (var field in typeof(SpellDetailsPopup).GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+                    if (field.FieldType == typeof(TMPro.TMP_Text)) field.SetValue(popup, new TMPro.TMP_Text());
+                Call(popup, "Awake"); var changed = 0;
+                popup.Open(realCatalog.Find("spell.wish"), hero, () => changed++); popup.ButtonToggleSelection();
+                Equal(1, changed); Equal("spell.wish", CharacterData.Load(hero.id).spellIds.Single());
+                var other = manager.CreateCharacter("Other", "Race", "Class", true, 0); manager.SetActiveCharacter(other);
+                Equal(false, popup.IsVisible); popup.ButtonToggleSelection(); Equal(1, changed); Equal(0, other.spellIds.Count);
+            });
+            Test("New fixed tabs do not overlap rebuilt dynamic tabs", () =>
+            {
+                var group = MakeTabGroup(); var staticPanels = Get<List<DnD.UI.TabContent>>(group, "contents");
+                for (var i=0; i<3; i++) { var button = new TabButton(); button.transform.SetParent(Get<Transform>(group, "content")); group.Register(button); staticPanels.Add(new DnD.UI.TabContent { Button = button, Content = new GameObject() }); }
+                var hero = new CharacterData(); hero.tabs.Add(new TabData { name = "A", index = 3 }); hero.tabs.Add(new TabData { name = "B", index = 4 });
+                Call(group, "Invalidate", hero); Equal(4, hero.tabs[0].index); Equal(5, hero.tabs[1].index);
+            });
             Test("Dropdown choices follow stable IDs through rename and reorder", () =>
             {
                 var dropdown = new TMPro.TMP_Dropdown();
@@ -417,6 +641,11 @@ static class Program
             });
             Console.WriteLine($"PASS: {passed} regression scenarios.");
         }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine(exception);
+            Environment.ExitCode = 1;
+        }
         finally
         {
             // Only delete the explicitly created unique test directory.
@@ -437,6 +666,33 @@ static class Program
     private static CharacterManager MakeManager()
     {
         var manager = new CharacterManager(); Set(manager, "leftButton", new Button()); Set(manager, "rightButton", new Button()); manager.InitializeSelf(); return manager;
+    }
+    private static (SpellListView view, RectTransform parent, ScrollRect scroll, List<SpellRowUI> rows) MakeDraggableSpells(CharacterData hero, SpellCatalog catalog, Action<SpellListEntry> remove = null)
+    {
+        var canvas = new Canvas(); var scroll = new ScrollRect(); scroll.transform.SetParent(canvas.transform);
+        var parent = new RectTransform(); parent.SetParent(scroll.transform);
+        var view = new SpellListView(); Set(view, "layoutContent", parent);
+        var rows = Get<List<SpellRowUI>>(view, "pool");
+        for(var i=0;i<hero.spellIds.Count;i++)
+        {
+            var row = new SpellRowUI(); Set(row, "titleText", new TMPro.TMP_Text()); row.transform.SetParent(parent);
+            var rect=(RectTransform)row.transform; rect.rect=new Rect { width=500,height=88 }; rect.position=new Vector3(0,300-i*100,0);
+            row.gameObject.AddComponent<CanvasGroup>(); row.gameObject.AddComponent<LayoutElement>(); var drag=row.gameObject.AddComponent<SpellCardDrag>();
+            var handle=new GameObject(); handle.transform.SetParent(row.transform); var dragButton=handle.AddComponent<DragButton>(); Call(dragButton,"Awake");
+            Set(drag,"dragHandle",handle); rows.Add(row);
+        }
+        view.SetItems(SpellListEntry.ForCharacter(hero,catalog),null,remove);
+        return (view,parent,scroll,rows);
+    }
+    private static SpellListView MakeSpellList()
+    {
+        var view = new SpellListView(); Set(view, "scrollRect", new ScrollRect()); Set(view, "rowPrefab", new SpellRowUI()); return view;
+    }
+    private static SpellLibraryPopup MakeSpellPopup()
+    {
+        var popup = new SpellLibraryPopup(); Set(popup, "searchInput", new TMPro.TMP_InputField()); Set(popup, "classFilter", new TMPro.TMP_Dropdown());
+        Set(popup, "listView", MakeSpellList()); Set(popup, "resultsText", new TMPro.TMP_Text()); Set(popup, "emptyMessage", new GameObject());
+        return popup;
     }
     private static CharacterOptionsProfile MakeCharacterOptions()
     {

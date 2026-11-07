@@ -14,6 +14,7 @@ namespace DnD.UI
         protected readonly List<TabButton> tabs = new();
         private TabButton selectedTab;
         protected TabButton SelectedTab => selectedTab;
+        protected int StaticTabCount => contents?.Count ?? 0;
 
         public void Register(TabButton tab)
         {
