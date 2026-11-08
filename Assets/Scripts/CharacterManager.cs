@@ -57,7 +57,7 @@ namespace DnD
         }
 
         public CharacterData CreateCharacter(string name, string race, string charClass, bool isMale, int avatarIndex,
-            string raceId = null, string characterClassId = null, string characterSubclassId = null)
+            string raceId = null, string characterClassId = null, string characterSubclassId = null, int avatarGroupIndex = 0)
         {
             var newChar = new CharacterData
             {
@@ -76,6 +76,7 @@ namespace DnD
                 speed = 30,
                 isMale = isMale,
                 avatarIndex = avatarIndex,
+                avatarGroupIndex = avatarGroupIndex,
                 isSelected = true,
             };
 

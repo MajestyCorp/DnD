@@ -75,7 +75,7 @@ namespace DnD.UI
             var characterClass = classChoice.Selection;
             var hero = CharacterManager.Instance.CreateCharacter(inputName.text, race.displayName,
                 characterClass.displayName, toggleMale.isOn, avatar.CurrentIndex, race.id, characterClass.id,
-                subclassChoice.SelectedId);
+                subclassChoice.SelectedId, avatar.CurrentGroup);
             if (hero == null)
                 return;
             CharacterManager.Instance.SetActiveCharacter(hero);

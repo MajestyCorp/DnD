@@ -24,18 +24,26 @@ namespace DnD.UI
 
         public static void Popup(ItemIconsProfile profile, Action<int, int> callbackOnSelect, Action callbackOnCancel)
         {
-            Instance.profile = profile;
-            Instance.callbackOnSelect = callbackOnSelect;
-            Instance.callbackOnCancel = callbackOnCancel;
-            Instance.ButtonShow();
+            Instance.Open(profile, callbackOnSelect, callbackOnCancel);
         }
 
-        public void InitializeSelf()
+        public void Open(ItemIconsProfile profile, Action<int, int> callbackOnSelect, Action callbackOnCancel = null)
+        {
+            if (profile == null) return;
+            this.profile = profile;
+            this.callbackOnSelect = callbackOnSelect;
+            this.callbackOnCancel = callbackOnCancel;
+            ButtonShow();
+        }
+
+        public virtual void InitializeSelf()
         {
             Instance = this;
 
-            prefab.gameObject.SetActive(false);
+            InitializeTemplate();
         }
+
+        protected void InitializeTemplate() { prefab.gameObject.SetActive(false); }
 
         public void SelectItem(int group, int id)
         {

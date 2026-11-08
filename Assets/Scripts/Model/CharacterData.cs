@@ -33,6 +33,7 @@ namespace DnD.Model
         public string alignment;       // Мировоззрение
         public bool isMale;
         public int avatarIndex;
+        public int avatarGroupIndex;
 
         // Основные характеристики (с модификаторами)
         public AttributeValue strength;

@@ -13,14 +13,14 @@ namespace DnD.Profiles
 
         public Sprite GetIcon(int groupId, int id)
         {
-            if (groupId < 0 || groupId >= groups.Count)
+            if (groups == null || groupId < 0 || groupId >= groups.Count || groups[groupId] == null)
             {
                 return null;
             }
 
             var icons = groups[groupId].icons;
 
-            if (id < 0 || id >= icons.Count)
+            if (icons == null || id < 0 || id >= icons.Count)
             {
                 return null;
             }

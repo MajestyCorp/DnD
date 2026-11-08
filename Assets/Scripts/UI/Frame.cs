@@ -18,6 +18,7 @@ namespace DnD.UI
         private EFrameAnimation frameAnimation = EFrameAnimation.None;
         [SerializeField]
         private bool invokeShowEvents = true;
+        protected bool InvokeShowEvents { get => invokeShowEvents; set => invokeShowEvents = value; }
 
         public bool IsVisible { get; private set; }
 
