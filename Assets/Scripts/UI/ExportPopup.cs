@@ -28,14 +28,34 @@ namespace DnD.UI
         private bool Export()
         {
             ExportList list = new();
+            DamagedCharacterFile damaged = null;
+            var damagedCount = 0;
 
             for (var i = 0; i < _items.Count; i++)
             {
                 var item = _items[i];
                 if (item.gameObject.activeSelf && item.IsOn)
                 {
-                    list.items.Add(item.Character);
+                    if (item.DamagedFile != null)
+                    {
+                        damaged = item.DamagedFile;
+                        damagedCount++;
+                    }
+                    else if (item.Character != null)
+                        list.items.Add(item.Character);
                 }
+            }
+
+            if (damagedCount > 0)
+            {
+                if (damagedCount != 1 || list.items.Count != 0)
+                {
+                    JsonStorage.Notify("Для экспорта исходного файла выберите только одного повреждённого персонажа. Снимите остальные отметки.");
+                    return false;
+                }
+                if (!damaged.TryReadText(out var raw)) return false;
+                GUIUtility.systemCopyBuffer = raw;
+                return true;
             }
 
             if (list.items.Count > 0)
@@ -79,6 +99,9 @@ namespace DnD.UI
                 prefab.Init(items[i]);
                 prefab.SetToggle(true);
             }
+            var damaged = CharacterData.DamagedFiles;
+            for (var i = 0; i < damaged.Count; i++)
+                GetPrefab(items.Count + i).InitDamaged(damaged[i]);
         }
 
         private ToggleCharacter GetPrefab(int index)

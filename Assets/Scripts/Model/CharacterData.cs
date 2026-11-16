@@ -134,6 +134,7 @@ namespace DnD.Model
             spellIds ??= new List<string>();
             var uniqueSpells = new HashSet<string>(StringComparer.Ordinal);
             spellIds.RemoveAll(id => string.IsNullOrWhiteSpace(id) || !uniqueSpells.Add(id));
+            items.RemoveAll(item => item != null && string.IsNullOrWhiteSpace(item.ID));
             foreach (var item in items)
                 item?.Normalize();
             foreach (var tab in tabs)
@@ -205,6 +206,16 @@ namespace DnD.Model
             return LoadPath(Path.Combine(FolderPath, $"hero_{id}.json"));
         }
 
+        private static readonly List<DamagedCharacterFile> damagedFiles = new();
+        public static IReadOnlyList<DamagedCharacterFile> DamagedFiles => damagedFiles;
+
+        public static bool DeleteDamagedFile(DamagedCharacterFile file)
+        {
+            if (file == null || !damagedFiles.Contains(file) || !file.Delete()) return false;
+            damagedFiles.Remove(file);
+            return true;
+        }
+
         private static CharacterData LoadPath(string path)
         {
             return JsonStorage.Read(path, json =>
@@ -218,6 +229,7 @@ namespace DnD.Model
 
         public static List<CharacterData> LoadAll()
         {
+            damagedFiles.Clear();
             var list = new List<CharacterData>();
             if (!Directory.Exists(FolderPath))
                 return list;
@@ -232,6 +244,8 @@ namespace DnD.Model
                     var data = LoadPath(file);
                     if (data != null)
                         list.Add(data);
+                    else
+                        damagedFiles.Add(new DamagedCharacterFile(file));
                 }
             }
             catch (Exception exception)
